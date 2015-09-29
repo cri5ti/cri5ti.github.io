@@ -1,0 +1,154 @@
+@import "_const";
+
+
+h1, h2, h3, h4, h5, h6 { font: @fontHeading; margin-top: 1.5em; margin-bottom: 0; }
+h1 { font-size: 150%; }
+h2 { font-size: 140%; }
+h3 { font-size: 130%; }
+h4 { font-size: 120%; }
+h5 { font-size: 110%; }
+h6 { font-size: 100%; }
+
+p, pre, blockquote {
+	margin: 1.5em 0;
+}
+
+p {
+	text-align: justify;
+}
+
+p + ul {
+	margin-top: -1em;
+}
+
+a {
+	color: @colorLink;
+}
+
+a:hover {
+	background: fade(#666, 10%);
+	text-shadow: 0 1px #fff;
+}
+
+ul {
+	li { list-style: circle; }
+}
+
+hr {
+	border: none;
+	height: 1px;
+	background: #ddd;
+	margin: 2.5em 0;
+}
+
+p code, li code {
+	font: @fontCode;
+	background: #eee; padding: 0 .35em;
+	text-shadow: 0 1px #fff;
+}
+
+pre {
+	border-left: solid 2px #ccc;
+	margin-left: -20px;
+	padding-left: 20px;
+}
+
+code {
+	font: @fontCode;
+	font-weight: inherit;
+}
+
+aside {
+	right: 0;
+	position: absolute;
+	font: @fontSide;
+	width: 180px;
+}
+
+
+p img, video {
+	display: block;
+	max-width: 100%;
+	margin: auto;
+}
+
+
+figure {
+	position: relative;
+	figcaption {
+		font: @fontMeta;
+		line-height: 1.25em;
+		margin: 5px;
+		text-align: justify;
+	}
+	aside {
+		top: 50%;
+		right: -200px;
+	}
+}
+
+blockquote {
+	margin-left: 30px;
+	position: relative;
+	color: @colorAccent;
+	&:before {
+		position: absolute;
+		top: 0; bottom: 0; left: -30px; width: 4px;
+		content: '';
+		background: repeating-linear-gradient(
+			125deg,
+			#fff,
+			#fff 4px,
+			@colorAccent 4px,
+			@colorAccent 8px
+		);
+	}
+}
+
+.img-grid {
+	@spacing: 50px;
+	@columns: 2;
+	font-size: 0;
+	img, figure {
+		position: relative;
+		vertical-align: top;
+
+		@media (min-width: @widthPage) {
+			display: inline-block;
+			margin: 0 @spacing @spacing 0;
+			width: (@widthContent - @spacing) / @columns;
+
+			&:nth-child(2n) {
+				margin: 0;
+			}
+		}
+		@media (max-width: @widthPage) {
+			max-width: 100%;
+			margin: 5px;
+		}
+	}
+	figure img {
+		width: 100%; margin: 0; display: block;
+	}
+}
+
+
+.section.img-right {
+	img { max-width: 200px; float: right; margin-left: 25px; }
+	&:after { content: ''; clear: both; display: block; }
+}
+
+
+
+img.framed {
+}
+
+img.enlarge {
+	//box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+
+	&:hover {
+		transition: transform .2s ease-out, box-shadow .2s ease-out;
+		transform: translate(0, -1px) scale(1.005, 1.005);
+		box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+	}
+}

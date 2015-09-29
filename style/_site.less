@@ -1,0 +1,276 @@
+@import "_const";
+
+html, body {
+	margin: 0; padding: 0;
+}
+
+body {
+	font: @fontBody;
+	color: @colorText;
+}
+
+
+
+.site-header {
+	h1 { font: 24px 'Slabo 27px'; }
+	h2 { font: 16px 'Slabo 27px'; }
+
+	a, a:visited { color: #aaa; text-decoration: none; }
+
+	h1, h2 { margin: 0; padding: 0; display: inline-block; }
+	h2 { color: #000; }
+
+	h2 a {
+		padding: 3px 6px;
+	}
+	h2 a:hover {
+		background: fade(#666, 10%);
+		color: #666;
+	}
+
+	.cri5ti {
+		white-space: nowrap;
+		visibility: collapse;
+		position: relative;
+
+		&:before, &:after {
+			position: absolute;
+			left: 0; top: 0;
+			transition: opacity .3s ease-out;
+		}
+
+		&:before {
+			content: 'Cristi Mihai'; visibility: visible; opacity: 1;
+		}
+		&:after {
+			content: 'Cri5ti.com'; color: #666; background: fade(#666,10%); visibility: visible; opacity: 0; padding: 5px 10px; margin: -5px -10px;
+		}
+		&:hover {
+			&:before { opacity: 0; }
+			&:after { opacity: 1; }
+		}
+	}
+
+}
+
+
+.img-page-header-full {
+	display: block;
+	width: auto;
+	margin-top: 93px;
+	height: 50vh;
+	background-size: cover;
+	background-position: center;
+
+	& + header {
+		position: absolute;
+		top: 0;
+		left: 0; right: 0;
+		//mix-blend-mode: multiply;
+		background: #fff !important;
+	}
+}
+
+
+#page {
+	display: flex;
+	flex-direction: column;
+
+	> header {
+		background: #eee;
+		padding: 32px;
+
+		> div {
+			@media (min-width: @widthPage) {
+				width: @widthPage;
+			}
+
+			margin: auto;
+		}
+
+		.logo { float: left; }
+		.menu { float: right; }
+
+		ul, li { margin: 0; padding: 0; list-style: none; }
+
+		.menu {
+			li {
+				text-transform: uppercase;
+				display: inline-block;
+			}
+
+			font: @fontMenu;
+			a {
+				text-decoration: none; color: @colorText;
+				padding: 6px 12px;
+				&:hover { background: fade(#666,10%); }
+			}
+
+			li + li { margin-left: 12px; }
+		}
+	}
+
+	> .main {
+		@media (min-width: @widthPage) {
+			width: @widthPage;
+		}
+
+		@media (max-width: @widthPage) {
+			padding: 0 1.5em;
+		}
+
+		margin: 1.5em auto;
+		position: relative;
+
+		.content {
+			@media (min-width: @widthPage) {
+				width: @widthContent;
+			}
+		}
+	}
+
+	> footer {
+		margin-top: 24px;
+		background: #eee;
+		padding: 32px;
+		font: @fontMeta;
+		text-align: center;
+	}
+
+}
+
+
+.post {
+	> header {
+		h1 { font: @fontTitle; margin: 0; color: @colorTitle; }
+		h2 { font: @fontSubtitle; margin: 0; color: @colorSubtitle; }
+		h3 { font: @fontSupertitle; margin: 0; color: @colorSupertitle; text-transform: uppercase; text-align: right; }
+		h3 + h1 { margin-top: -0.25em; }
+
+		.h1-box { display: inline-block }
+	}
+
+	.meta {
+		font: @fontMeta;
+		color: @colorMeta;
+
+		.separator {
+			display: inline-block;
+			margin: 0 .2em;
+		}
+
+		a, em { color: @colorText; font-style: normal; }
+		a {
+			text-decoration: underline;
+			&:hover { text-decoration: underline; }
+		}
+	}
+
+	.tags {
+		a { color: @colorText; font: @fontMeta; }
+	}
+
+	> footer {
+		border-top: solid 1px #aaa;
+		margin-top: 24px;
+		padding-top: 24px;
+		background: #fff;
+	}
+}
+
+article.post {
+	.meta {
+		margin: 2em 0 0 0;
+	}
+}
+
+ul.index {
+
+	> li.post {
+		&.draft { border-left: dotted 4px #f60; margin-left: -25px; padding-left: 21px; }
+		list-style: none;
+
+		> header {
+
+			h1 {
+				font: @fontTitle; margin: 0; color: @colorTitle;
+				font-size: 24px;
+				font-weight: normal;
+				a { color: @colorTitle; text-decoration: none; }
+				a:hover { text-decoration: underline; }
+			}
+		}
+
+		.img-main {
+			@size: 200px;
+			width: @size;
+			float: right;
+			margin-left: 50px;
+			margin-right: -150px;
+			overflow: hidden;
+
+			.img-fit {
+				@width: @size*2;
+				width: @width;
+				margin-left: (-@width+@size)/2;
+				text-align: center;
+			}
+			img {
+				height: @size;
+				margin: auto;
+			}
+		}
+
+		img.main + p {
+			//display: inline-block;
+			//width: @widthContent - 300px;
+		}
+
+		.meta { clear: both; }
+
+	}
+
+	> li + li {
+		border-top: solid 1px #ddd;
+		margin-top: 1.5em;
+		padding-top: 1.5em;
+	}
+
+
+	&.columns-2 {
+		display: flex;
+		flex-flow: row;
+		flex-wrap: wrap;
+		align-items: stretch;
+		justify-content: space-between;
+
+		li { flex: 0 450px; }
+
+		> li + li {
+			border-top: none;
+			margin-top: 0;
+		}
+	}
+}
+
+ul.also-read {
+	li.post {
+		> header h1 { font: @fontSubtitle; }
+		font: @fontSide;
+		.meta { display: none; }
+	}
+
+	header + p { margin-top: 0; }
+}
+
+
+.panel {
+	h1 { font-size: 1.5em; }
+	h2 { font-size: 1.2em; }
+
+	font-size: 80%;
+	ul, li { margin: 0; padding: 0; list-style: none; }
+	li + li {
+		border-top: solid 1px #aaa;
+	}
+}

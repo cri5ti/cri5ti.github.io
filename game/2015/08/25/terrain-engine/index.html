@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="/style/main.css"/>
+<link href="/blog/atom.xml" type="application/atom+xml" rel="alternate" title="Blog" />
+
+
+	
+	<meta name="description" content="So, I&#39;ve been having fun with some OpenGL, I&#39;m working on a terrain engine, we&#39;ll see where it goes...
+
+
+So far, I&#39;ve got:
+
+voxel terrain renderer, tesselated with marching cubes. 
+
+the signed density function is generated from a few octaves of simplex noise.
+
+multithreaded chunk generation and tesselation with no world bounds.
+
+triplanar mapping..." />
+	<meta name="keywords" content="marching cubes,triplanar mapping,OpenGL,C++," />
+
+	<title> Terrain rendering - Cristi Mihai </title>
+</head>
+<body>
+	
+<div id="page">
+	
+
+	<div class="img-page-header-full" style="background-image: url(/game/2015/08/25/terrain-engine/header.jpg)"></div>
+
+
+	<header>
+		<div class="site-header">
+	<div class="logo">
+		<h1><a href="/" class="cri5ti">Cristi Mihai</a></h1>
+		<h2><a href="/game">A game engine</a></h2>
+	</div>
+	<ul class="menu">
+		<!--<li><a href="/projects">Personal</a></li>-->
+		<!--<li><a href="/archive">Archive</a></li>-->
+		<!--<li><a href="/about">About</a></li>-->
+	</ul>
+</div>
+	</header>
+
+	<div class="main">
+		
+
+<article class="post" itemscope itemtype="http://schema.org/Article">
+
+	<header>
+		<div class="h1-row">
+			<div class="h1-box">
+				<h3>Game engine</h3>
+				<h1 itemprop="name headline">Terrain rendering</h1>
+			</div>
+		</div>
+		
+
+		<div class="meta">
+			
+			<em><time itemprop="datePublished" datetime="2015-08-25T11:00:00+00:00">25 August 2015</time></em>
+			
+			<span class="separator"></span>
+			
+			<span>by</span>
+			<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+			
+			<span class="separator"></span>
+			<span>in</span>
+			<a href="/game">A game engine</a>
+
+			
+			<div class="tags">
+				<span>Tagged: </span>
+				
+				  <a href="/game/tags/marching-cubes">marching cubes</a> | <a href="/game/tags/triplanar-mapping">triplanar mapping</a> | <a href="/game/tags/OpenGL">OpenGL</a> | <a href="/game/tags/C++">C++</a>
+			</div>
+			
+		</div>
+	</header>
+
+	<div class="content" itemprop="description articleBody">
+		<p>So, I've been having fun with some OpenGL, I'm working on a terrain engine, we'll see where it goes...</p>
+<p><img src="/game/2015/08/25/terrain-engine/1.jpg" class="enlarge"/></p>
+<hr>
+<p>So far, I've got:</p>
+<ul>
+<li><p>voxel terrain renderer, tesselated with <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a>. </p>
+</li>
+<li><p>the signed density function is generated from a few octaves of simplex noise.</p>
+</li>
+<li><p>multithreaded chunk generation and tesselation with no world bounds.</p>
+</li>
+<li><p>triplanar mapping with a fixed directional light.</p>
+</li>
+</ul>
+<h2 id="performance-">Performance:</h2>
+<p>Currently, the chunks are of fixed size, and I can generate and render about 7^3 chunks around the player, while you're moving around.</p>
+<h2 id="immediate-future-plans-">Immediate future plans:</h2>
+<ul>
+<li><p>rewrite the <code>ChunkManager</code> to use the Octree to determine views in frustum, and apply LOD based on view distance. Currently I'm using a <code>std::unordered_map</code> hashed by chunk coordinates, which is not very fast. (I'm just for-looping around the player to get/generate visible chunks).</p>
+</li>
+<li><p>use LOD chunks to increase the view distance.</p>
+</li>
+<li><p>switch to <a href="http://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">Dual Contouring</a>.</p>
+</li>
+</ul>
+
+	</div>
+
+	<footer>
+		
+		<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+	var disqus_shortname = 'cri5ti';
+	var disqus_identifier = '/game/2015/08/25/terrain-engine';
+	var disqus_title = 'Terrain rendering';
+	var disqus_url = 'http://cri5ti.com/game/2015/08/25/terrain-engine/';
+
+	function run_disqus_script(disqus_script){
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	}
+	run_disqus_script('embed.js');
+</script>
+		
+	</footer>
+
+</article>
+
+
+
+
+	</div>
+
+	<footer>
+		Copyright &copy; 2012 - 2015 - Cristi Mihai
+	</footer>
+</div>
+
+
+
+	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-43450851-1', 'auto');
+  ga('set', 'campaignName', '49');
+  ga('send', 'pageview');
+</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/script/mybox.js"></script>
+</body>
+</html>

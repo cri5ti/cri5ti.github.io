@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="/style/main.css"/>
+<link href="/blog/atom.xml" type="application/atom+xml" rel="alternate" title="Blog" />
+
+
+	
+	<meta name="description" content="We&#39;re going to need some trees for our terrain, so I&#39;ve been experimenting with the space colonization algorithm.
+Whitepaper: Modeling Trees with a Space Colonization Algorithm - Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz.
+
+
+
+
+
+
+I&#39;ve done several changes on the algorithm, adding several parameters: 
+
+control how the points attract branches (per branch..." />
+	<meta name="keywords" content="trees,space colonization," />
+
+	<title> Growing trees - Cristi Mihai </title>
+</head>
+<body>
+	
+<div id="page">
+	
+
+	<div class="img-page-header-full" style="background-image: url(/game/2015/08/28/growing-trees/3.png)"></div>
+
+
+	<header>
+		<div class="site-header">
+	<div class="logo">
+		<h1><a href="/" class="cri5ti">Cristi Mihai</a></h1>
+		<h2><a href="/game">A game engine</a></h2>
+	</div>
+	<ul class="menu">
+		<!--<li><a href="/projects">Personal</a></li>-->
+		<!--<li><a href="/archive">Archive</a></li>-->
+		<!--<li><a href="/about">About</a></li>-->
+	</ul>
+</div>
+	</header>
+
+	<div class="main">
+		
+
+<article class="post" itemscope itemtype="http://schema.org/Article">
+
+	<header>
+		<div class="h1-row">
+			<div class="h1-box">
+				<h3>Sandbox</h3>
+				<h1 itemprop="name headline">Growing trees</h1>
+			</div>
+		</div>
+		
+
+		<div class="meta">
+			
+			<em><time itemprop="datePublished" datetime="2015-08-28T11:00:00+00:00">28 August 2015</time></em>
+			
+			<span class="separator"></span>
+			
+			<span>by</span>
+			<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+			
+			<span class="separator"></span>
+			<span>in</span>
+			<a href="/game">A game engine</a>
+
+			
+			<div class="tags">
+				<span>Tagged: </span>
+				
+				  <a href="/game/tags/trees">trees</a> | <a href="/game/tags/space-colonization">space colonization</a>
+			</div>
+			
+		</div>
+	</header>
+
+	<div class="content" itemprop="description articleBody">
+		<p>We're going to need some trees for our <a href="/blog/game/2015/08/25/terrain-engine">terrain</a>, so I've been experimenting with the <em>space colonization algorithm</em>.</p>
+<aside>Whitepaper: <a href="http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf">Modeling Trees with a Space Colonization Algorithm</a> - <em>Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz</em>.</aside>
+
+
+<p><div class="section img-grid">
+<img src="/game/2015/08/28/growing-trees/1.png" class="enlarge"/>
+<img src="/game/2015/08/28/growing-trees/2.png" class="enlarge"/>
+</div></p>
+<p>I've done several changes on the algorithm, adding several parameters: </p>
+<ul>
+<li>control how the points attract branches (per branch level)</li>
+<li>control the max length of branches</li>
+<li>sprouting (simulate bud growing)</li>
+</ul>
+<p>Here is a snippet of the parameters:</p>
+<pre><code class="lang-js"><span class="hljs-variable"><span class="hljs-keyword">var</span> attractRange</span> = <span class="hljs-number">50</span>;    <span class="hljs-comment">// the distance of attraction</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> attractWeight</span> = [<span class="hljs-number">0.02</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.2</span>]; <span class="hljs-comment">// the weight of attraction, per branching level. (Here, the trunk is barely affected)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> collectRange</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// the range at which points are removed</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> gravityWeight</span> = <span class="hljs-number">0.01</span>; <span class="hljs-comment">// the weight gravity affects growth direction</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> growSpeed</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// the growth distance per iteration</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> maxLength</span> = <span class="hljs-number">500</span>; <span class="hljs-comment">// max length of tree</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> maxLengthVar</span> = <span class="hljs-number">0.2</span>;
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryMaxLengthVariance</span> = [<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>]; <span class="hljs-comment">// the variance of max length of branches, per level  (0 = no change, 0.5 = +/- 50% random variation)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryMaxLengthWeight</span> = [<span class="hljs-number">1</span>,<span class="hljs-number">0.8</span>,<span class="hljs-number">0.8</span>]; <span class="hljs-comment">// fixed multiplier of max length per branch</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutInterval</span> = [<span class="hljs-number">30</span>,<span class="hljs-number">10</span>,<span class="hljs-number">10</span>]; <span class="hljs-comment">// the interval at which buds are created</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutIntervalVar</span> = <span class="hljs-number">0.2</span>; <span class="hljs-comment">// variation</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutGerminationTime</span> = <span class="hljs-number">10</span>; <span class="hljs-comment">// time it takes for a bud to germinate. This prevents buds from collecting attraction points immediately, leaving the parent branch the chance to collect first.</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutGerminationTimeVar</span> = <span class="hljs-number">5</span>; 
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> branchingAngle</span> = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>]; <span class="hljs-comment">// the initial branch angles the buds sprout (per level)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> branchingAngleVar</span> = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>];
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryGrowthRate</span> = <span class="hljs-number">0.1</span>; <span class="hljs-comment">// the branch girth growth rate</span>
+</code></pre>
+<p>And here it is running, parameterized for a fir tree:</p>
+<iframe width="720" height="405" src="https://www.youtube.com/embed/jIgkLP9Jz1A" frameborder="0" allowfullscreen></iframe>
+	</div>
+
+	<footer>
+		
+		<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+	var disqus_shortname = 'cri5ti';
+	var disqus_identifier = '/game/2015/08/28/growing-trees';
+	var disqus_title = 'Growing trees';
+	var disqus_url = 'http://cri5ti.com/game/2015/08/28/growing-trees/';
+
+	function run_disqus_script(disqus_script){
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	}
+	run_disqus_script('embed.js');
+</script>
+		
+	</footer>
+
+</article>
+
+
+
+
+	</div>
+
+	<footer>
+		Copyright &copy; 2012 - 2015 - Cristi Mihai
+	</footer>
+</div>
+
+
+
+	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-43450851-1', 'auto');
+  ga('set', 'campaignName', '49');
+  ga('send', 'pageview');
+</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/script/mybox.js"></script>
+</body>
+</html>

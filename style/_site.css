@@ -1,0 +1,300 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font: 400 16px/1.5em 'PT Serif', serif;
+  color: #4d4d4d;
+}
+.site-header h1 {
+  font: 24px 'Slabo 27px';
+}
+.site-header h2 {
+  font: 16px 'Slabo 27px';
+}
+.site-header a,
+.site-header a:visited {
+  color: #aaa;
+  text-decoration: none;
+}
+.site-header h1,
+.site-header h2 {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
+.site-header h2 {
+  color: #000;
+}
+.site-header h2 a {
+  padding: 3px 6px;
+}
+.site-header h2 a:hover {
+  background: rgba(102, 102, 102, 0.1);
+  color: #666;
+}
+.site-header .cri5ti {
+  white-space: nowrap;
+  visibility: collapse;
+  position: relative;
+}
+.site-header .cri5ti:before,
+.site-header .cri5ti:after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: opacity 0.3s ease-out;
+}
+.site-header .cri5ti:before {
+  content: 'Cristi Mihai';
+  visibility: visible;
+  opacity: 1;
+}
+.site-header .cri5ti:after {
+  content: 'Cri5ti.com';
+  color: #666;
+  background: rgba(102, 102, 102, 0.1);
+  visibility: visible;
+  opacity: 0;
+  padding: 5px 10px;
+  margin: -5px -10px;
+}
+.site-header .cri5ti:hover:before {
+  opacity: 0;
+}
+.site-header .cri5ti:hover:after {
+  opacity: 1;
+}
+.img-page-header-full {
+  display: block;
+  width: auto;
+  margin-top: 93px;
+  height: 50vh;
+  background-size: cover;
+  background-position: center;
+}
+.img-page-header-full + header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff !important;
+}
+#page {
+  display: flex;
+  flex-direction: column;
+}
+#page > header {
+  background: #eee;
+  padding: 32px;
+}
+#page > header > div {
+  margin: auto;
+}
+@media (min-width: 960px) {
+  #page > header > div {
+    width: 960px;
+  }
+}
+#page > header .logo {
+  float: left;
+}
+#page > header .menu {
+  float: right;
+}
+#page > header ul,
+#page > header li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#page > header .menu {
+  font: 400 14px Open Sans;
+}
+#page > header .menu li {
+  text-transform: uppercase;
+  display: inline-block;
+}
+#page > header .menu a {
+  text-decoration: none;
+  color: #4d4d4d;
+  padding: 6px 12px;
+}
+#page > header .menu a:hover {
+  background: rgba(102, 102, 102, 0.1);
+}
+#page > header .menu li + li {
+  margin-left: 12px;
+}
+#page > .main {
+  margin: 1.5em auto;
+  position: relative;
+}
+@media (min-width: 960px) {
+  #page > .main {
+    width: 960px;
+  }
+}
+@media (max-width: 960px) {
+  #page > .main {
+    padding: 0 1.5em;
+  }
+}
+@media (min-width: 960px) {
+  #page > .main .content {
+    width: 720px;
+  }
+}
+#page > footer {
+  margin-top: 24px;
+  background: #eee;
+  padding: 32px;
+  font: 400 12px/24px Open Sans;
+  text-align: center;
+}
+.post > header h1 {
+  font: 800 42px 'PT Sans';
+  margin: 0;
+  color: #333333;
+}
+.post > header h2 {
+  font: 400 20px Open Sans;
+  margin: 0;
+  color: #666666;
+}
+.post > header h3 {
+  font: 400 10px Open Sans;
+  margin: 0;
+  color: #aaaaaa;
+  text-transform: uppercase;
+  text-align: right;
+}
+.post > header h3 + h1 {
+  margin-top: -0.25em;
+}
+.post > header .h1-box {
+  display: inline-block;
+}
+.post .meta {
+  font: 400 12px/24px Open Sans;
+  color: #aaaaaa;
+}
+.post .meta .separator {
+  display: inline-block;
+  margin: 0 .2em;
+}
+.post .meta a,
+.post .meta em {
+  color: #4d4d4d;
+  font-style: normal;
+}
+.post .meta a {
+  text-decoration: underline;
+}
+.post .meta a:hover {
+  text-decoration: underline;
+}
+.post .tags a {
+  color: #4d4d4d;
+  font: 400 12px/24px Open Sans;
+}
+.post > footer {
+  border-top: solid 1px #aaa;
+  margin-top: 24px;
+  padding-top: 24px;
+  background: #fff;
+}
+article.post .meta {
+  margin: 2em 0 0 0;
+}
+ul.index > li.post {
+  list-style: none;
+}
+ul.index > li.post.draft {
+  border-left: dotted 4px #f60;
+  margin-left: -25px;
+  padding-left: 21px;
+}
+ul.index > li.post > header h1 {
+  font: 800 42px 'PT Sans';
+  margin: 0;
+  color: #333333;
+  font-size: 24px;
+  font-weight: normal;
+}
+ul.index > li.post > header h1 a {
+  color: #333333;
+  text-decoration: none;
+}
+ul.index > li.post > header h1 a:hover {
+  text-decoration: underline;
+}
+ul.index > li.post .img-main {
+  width: 200px;
+  float: right;
+  margin-left: 50px;
+  margin-right: -150px;
+  overflow: hidden;
+}
+ul.index > li.post .img-main .img-fit {
+  width: 400px;
+  margin-left: -100px;
+  text-align: center;
+}
+ul.index > li.post .img-main img {
+  height: 200px;
+  margin: auto;
+}
+ul.index > li.post .meta {
+  clear: both;
+}
+ul.index > li + li {
+  border-top: solid 1px #ddd;
+  margin-top: 1.5em;
+  padding-top: 1.5em;
+}
+ul.index.columns-2 {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+}
+ul.index.columns-2 li {
+  flex: 0 450px;
+}
+ul.index.columns-2 > li + li {
+  border-top: none;
+  margin-top: 0;
+}
+ul.also-read li.post {
+  font: 12px 'PT Sans';
+}
+ul.also-read li.post > header h1 {
+  font: 400 20px Open Sans;
+}
+ul.also-read li.post .meta {
+  display: none;
+}
+ul.also-read header + p {
+  margin-top: 0;
+}
+.panel {
+  font-size: 80%;
+}
+.panel h1 {
+  font-size: 1.5em;
+}
+.panel h2 {
+  font-size: 1.2em;
+}
+.panel ul,
+.panel li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.panel li + li {
+  border-top: solid 1px #aaa;
+}

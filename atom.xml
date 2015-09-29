@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Cristi Mihai]]></title>
+    <subtitle><![CDATA[A dev&#39;s rants]]></subtitle>
+    <link href="/atom.xml" rel="self"/>
+    <link href="http://cri5ti.com"/>
+    <updated>2015-09-29T12:22:06+00:00</updated>
+    <id>http://cri5ti.com</id>
+
+    <author>
+        <name><![CDATA[Cristi Mihai]]></name>
+    </author>
+
+    <generator uri="http://cri5ti.com/blog/web/2015/09/25/My-static-generator/">Forge</generator>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Powered by: Forge - A Node.js static content generator]]></title>
+        <link href="http://cri5ti.com/web/2015/09/25/My-static-generator/"/>
+        <id>http://cri5ti.com/web/2015/09/25/My-static-generator/</id>
+        <published>2015-09-25T11:00:00+00:00</published>
+        <updated>2015-09-25T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>After trying out static website generators, like <a href="https://jekyllrb.com/">Jekyll</a> and <a href="http://octopress.org/">Octopress</a>, I have 
+started to appreciate the simplicity of deploying a bunch of files and be done with it. 
+With the <a href="https://pages.github.com/">GitHub Pages</a>, the whole process becomes even more attractive, as even the 
+hosting is free, and very simple, just one push away.</p>
+<p>While any existing solution works well, I'm a JavaScript guy, and I want to be able to customise everything to my liking. 
+<a href="hexo">Hexo</a> was a good start, but we can do something better.</p>
+<p>In the following post I will present <em>Forge</em>, my static generator that powers this website.</p>
+<h2 id="tree-structure">Tree structure</h2>
+<p>In Forge all data is organised in a tree structure, with each node having one of the basic types:</p>
+<ul>
+<li><strong>text</strong>: such as a static page, or a blog post.</li>
+<li><strong>data</strong>: stores arbitrary data (we'll come to this later)</li>
+<li><strong>namespace</strong>: groups related nodes together. Namespaces inherit from their parents.</li>
+</ul>
+<p>The default file processors are:</p>
+<ul>
+<li>folders create namespaces</li>
+<li>markdown files create a data (the frontmatter) and text nodes</li>
+<li>YAML files create data nodes</li>
+<li>there are special <code>layout</code> nodes for templates</li>
+<li><code>.js</code> files are executed to process the tree structure on the spot. </li>
+</ul>
+<hr/>
+
+<figure>
+    {% img  'step1.png' %}
+    <aside>Files and folders are scanned to generate the tree.</aside>
+</figure>
+
+<hr/>
+
+<figure>
+    {% img  'step2.png' %}
+    <aside>Markdown is split into data (frontmatter) and text.</aside>
+</figure>
+
+<hr/>
+
+<p><em>Forge</em> doesn't have any implicit behaviour on how to generate anything, really. You have to write your own 
+tree parsers that generates whatever you want.</p>
+<p>Here is an example of how blog posts may be processed: </p>
+<pre><code class="lang-js">blog.<span class="hljs-keyword">post</span>(function(blog) {
+    <span class="hljs-keyword">var</span> regexPost = /^(\<span class="hljs-keyword">d</span>{4})-(\<span class="hljs-keyword">d</span>{2})-(\<span class="hljs-keyword">d</span>{2})-(.*)$/;
+    blog.each({ <span class="hljs-keyword">type</span>: Node.NS, deep: true, name: regexPost }, function(<span class="hljs-keyword">post</span>, y, <span class="hljs-keyword">m</span>, <span class="hljs-keyword">d</span>, title) {
+        <span class="hljs-keyword">post</span>.addData({ <span class="hljs-comment">// add extra data to posts</span>
+            blog: blog,
+            title: title,
+            date: new <span class="hljs-literal">Date</span>(y, <span class="hljs-keyword">m</span>-1, <span class="hljs-keyword">d</span>)
+        }); 
+
+        posts.push(<span class="hljs-keyword">post</span>);
+    });
+});
+</code></pre>
+<figure>
+    {% img  'step3.png' %}
+    <aside>Here's the structure of a blog post after processing.</aside>
+</figure>
+
+<hr>
+<h1 id="pages">Pages</h1>
+<p>Pages that are supposed to be generated are explicitly specified while parsing the tree. 
+This allows greater flexibility in what you produce, what data is available and what template to use. 
+In our example blog, pages are generated for valid posts, tags, categories, archive, etc.</p>
+<pre><code>blogNS.<span class="hljs-keyword">render</span>(<span class="hljs-string">'index.html'</span>, { <span class="hljs-keyword">layout</span>: <span class="hljs-string">'indexPosts'</span> }, {
+    posts: posts <span class="hljs-comment">// custom data</span>
+    <span class="hljs-comment">// rest of data is provided from the namespace</span>
+});
+</code></pre><h1 id="templates">Templates</h1>
+<p>For templates, I use <a href="https://mozilla.github.io/nunjucks/">Nunjucks</a>, an amazing template engine from Mozilla, which besides partials and includes,
+also provides a nice inheritance feature via <a href="http://mozilla.github.io/nunjucks/templating.html#template-inheritance">blocks</a>.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>I really like this approach in generating the content, and I don't regret spending the time. 
+It reminds me if my graduation project, a Content Management System based on a similar tree structure, so I had fun with it.</p>
+<p>If I will have the time to iterate on the protect, I hope I can reduce the complexity of node processing, 
+currently new data gets appended in new nodes, as I hoped I would be able to regenerate only affected nodes when filesystem changes, 
+but that seemed to be more complex than I expected, and irrelevant at the moment as rebuilding everything is fast enough.</p>
+<p>Another point I would like to work is the way tree scanning work. Currently the namespace iteration is not contrained, 
+you have to implement the iterators to deep search for the nodes of specific types and break when you found what you need. </p>
+<p>I don't expect I will release the project any time soon, as it's more of a personal toy, complex and messy in places.  </p>
+<p>Have you found this interesting? Let me know, and I might post some more details about it. </p>
+]]></content>
+        <summary type="html">
+            <![CDATA[After trying out static website generators, like Jekyll and Octopress, I have 
+started to appreciate the simplicity of deploying a bunch of files and be done with it. 
+With the GitHub Pages, the whole process becomes even more attractive, as even the 
+hosting is free, and very simple, just one...]]>
+        </summary>
+
+        
+        <category term="Forge" scheme="http://cri5ti.com/tags/Forge/"/>
+        
+        <category term="static generator" scheme="http://cri5ti.com/tags/static-generator/"/>
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Sandbox: Growing trees]]></title>
+        <link href="http://cri5ti.com/game/2015/08/28/growing-trees/"/>
+        <id>http://cri5ti.com/game/2015/08/28/growing-trees/</id>
+        <published>2015-08-28T11:00:00+00:00</published>
+        <updated>2015-08-28T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>We're going to need some trees for our <a href="/blog/game/2015/08/25/terrain-engine">terrain</a>, so I've been experimenting with the <em>space colonization algorithm</em>.</p>
+<aside>Whitepaper: <a href="http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf">Modeling Trees with a Space Colonization Algorithm</a> - <em>Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz</em>.</aside>
+
+
+<p>{% section 'img-grid' %}
+{% img src='1.png', class='enlarge' %}
+{% img src='2.png', class='enlarge' %}
+{% endsection %}</p>
+<p>I've done several changes on the algorithm, adding several parameters: </p>
+<ul>
+<li>control how the points attract branches (per branch level)</li>
+<li>control the max length of branches</li>
+<li>sprouting (simulate bud growing)</li>
+</ul>
+<p>Here is a snippet of the parameters:</p>
+<pre><code class="lang-js"><span class="hljs-variable"><span class="hljs-keyword">var</span> attractRange</span> = <span class="hljs-number">50</span>;    <span class="hljs-comment">// the distance of attraction</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> attractWeight</span> = [<span class="hljs-number">0.02</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.2</span>]; <span class="hljs-comment">// the weight of attraction, per branching level. (Here, the trunk is barely affected)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> collectRange</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// the range at which points are removed</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> gravityWeight</span> = <span class="hljs-number">0.01</span>; <span class="hljs-comment">// the weight gravity affects growth direction</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> growSpeed</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// the growth distance per iteration</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> maxLength</span> = <span class="hljs-number">500</span>; <span class="hljs-comment">// max length of tree</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> maxLengthVar</span> = <span class="hljs-number">0.2</span>;
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryMaxLengthVariance</span> = [<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>]; <span class="hljs-comment">// the variance of max length of branches, per level  (0 = no change, 0.5 = +/- 50% random variation)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryMaxLengthWeight</span> = [<span class="hljs-number">1</span>,<span class="hljs-number">0.8</span>,<span class="hljs-number">0.8</span>]; <span class="hljs-comment">// fixed multiplier of max length per branch</span>
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutInterval</span> = [<span class="hljs-number">30</span>,<span class="hljs-number">10</span>,<span class="hljs-number">10</span>]; <span class="hljs-comment">// the interval at which buds are created</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutIntervalVar</span> = <span class="hljs-number">0.2</span>; <span class="hljs-comment">// variation</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutGerminationTime</span> = <span class="hljs-number">10</span>; <span class="hljs-comment">// time it takes for a bud to germinate. This prevents buds from collecting attraction points immediately, leaving the parent branch the chance to collect first.</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> sproutGerminationTimeVar</span> = <span class="hljs-number">5</span>; 
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> branchingAngle</span> = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>]; <span class="hljs-comment">// the initial branch angles the buds sprout (per level)</span>
+<span class="hljs-variable"><span class="hljs-keyword">var</span> branchingAngleVar</span> = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>];
+
+<span class="hljs-variable"><span class="hljs-keyword">var</span> secondaryGrowthRate</span> = <span class="hljs-number">0.1</span>; <span class="hljs-comment">// the branch girth growth rate</span>
+</code></pre>
+<p>And here it is running, parameterized for a fir tree:</p>
+<iframe width="720" height="405" src="https://www.youtube.com/embed/jIgkLP9Jz1A" frameborder="0" allowfullscreen></iframe>]]></content>
+        <summary type="html">
+            <![CDATA[We're going to need some trees for our terrain, so I've been experimenting with the space colonization algorithm.
+Whitepaper: Modeling Trees with a Space Colonization Algorithm - Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz.
+
+
+
+
+
+
+I've done several changes on the algorithm, adding several parameters: 
+
+control how the points attract branches (per branch...]]>
+        </summary>
+
+        
+        <category term="trees" scheme="http://cri5ti.com/tags/trees/"/>
+        
+        <category term="space colonization" scheme="http://cri5ti.com/tags/space-colonization/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Game engine: Terrain rendering]]></title>
+        <link href="http://cri5ti.com/game/2015/08/25/terrain-engine/"/>
+        <id>http://cri5ti.com/game/2015/08/25/terrain-engine/</id>
+        <published>2015-08-25T11:00:00+00:00</published>
+        <updated>2015-08-25T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>So, I've been having fun with some OpenGL, I'm working on a terrain engine, we'll see where it goes...</p>
+<p>{% img src='1.jpg', class="enlarge" %}</p>
+<hr>
+<p>So far, I've got:</p>
+<ul>
+<li><p>voxel terrain renderer, tesselated with <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a>. </p>
+</li>
+<li><p>the signed density function is generated from a few octaves of simplex noise.</p>
+</li>
+<li><p>multithreaded chunk generation and tesselation with no world bounds.</p>
+</li>
+<li><p>triplanar mapping with a fixed directional light.</p>
+</li>
+</ul>
+<h2 id="performance-">Performance:</h2>
+<p>Currently, the chunks are of fixed size, and I can generate and render about 7^3 chunks around the player, while you're moving around.</p>
+<h2 id="immediate-future-plans-">Immediate future plans:</h2>
+<ul>
+<li><p>rewrite the <code>ChunkManager</code> to use the Octree to determine views in frustum, and apply LOD based on view distance. Currently I'm using a <code>std::unordered_map</code> hashed by chunk coordinates, which is not very fast. (I'm just for-looping around the player to get/generate visible chunks).</p>
+</li>
+<li><p>use LOD chunks to increase the view distance.</p>
+</li>
+<li><p>switch to <a href="http://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">Dual Contouring</a>.</p>
+</li>
+</ul>
+]]></content>
+        <summary type="html">
+            <![CDATA[So, I've been having fun with some OpenGL, I'm working on a terrain engine, we'll see where it goes...
+
+
+So far, I've got:
+
+voxel terrain renderer, tesselated with marching cubes. 
+
+the signed density function is generated from a few octaves of simplex noise.
+
+multithreaded chunk generation and tesselation with no world bounds.
+
+triplanar mapping...]]>
+        </summary>
+
+        
+        <category term="marching cubes" scheme="http://cri5ti.com/tags/marching-cubes/"/>
+        
+        <category term="triplanar mapping" scheme="http://cri5ti.com/tags/triplanar-mapping/"/>
+        
+        <category term="OpenGL" scheme="http://cri5ti.com/tags/OpenGL/"/>
+        
+        <category term="C++" scheme="http://cri5ti.com/tags/C++/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Dindin! - a usable task manager.]]></title>
+        <link href="http://cri5ti.com/projects/2013/08/15/dindin/"/>
+        <id>http://cri5ti.com/projects/2013/08/15/dindin/</id>
+        <published>2013-08-15T11:00:00+00:00</published>
+        <updated>2013-08-15T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>I haven't found a good task manager yet that actually helps me get things done.
+I loved the <a href="http://www.omnigroup.com/products/omnifocus/">OmniFocus</a> when I was still on OSX, but I've moved to Windows and
+I wasn't able to find a good replacement.</p>
+<p>Like any geek, I've decided to roll my own.</p>
+<p>{% img 'dindin.png' %}</p>
+]]></content>
+        <summary type="html">
+            <![CDATA[I haven't found a good task manager yet that actually helps me get things done.
+I loved the OmniFocus when I was still on OSX, but I've moved to Windows and
+I wasn't able to find a good replacement.
+Like any geek, I've decided to roll my own.
+
+...]]>
+        </summary>
+
+        
+        <category term="Cancelled projects" scheme="http://cri5ti.com/tags/Cancelled-projects/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Shortfuse - A HTML5 Bomberman]]></title>
+        <link href="http://cri5ti.com/projects/2012/03/19/HTML5-bomberman/"/>
+        <id>http://cri5ti.com/projects/2012/03/19/HTML5-bomberman/</id>
+        <published>2012-03-19T12:00:00+00:00</published>
+        <updated>2012-03-19T12:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>{# img 'screen-small.png' #}</p>
+<p>A HTML5 Bomberman clone using <em>node.js</em>, <em>socket.io</em>, <em>Backbone</em>, <em>underscore</em>, <em>jQuery</em>, CSS3 via <em>Sass</em> and <em>Compass</em></p>
+<h2 id="-play-it-"><del>Play it</del></h2>
+<p><em>Update:</em> The project is no longer hosted, but you can get the sources, and run it on your machine.</p>
+<h4 id="-see-the-project-on-github-http-github-com-cri5ti-html5-bomberman-"><a href="http://github.com/cri5ti/html5-bomberman">See the project on github</a>.</h4>
+<hr>
+<p>{% section 'img-grid' %}
+{% img 'short-fuse-menu1.png' %}
+{% img 'short-fuse-run.png' %}
+{% img 'short-fuse-dead1.png' %}
+{% endsection %}</p>
+<hr>
+<p><a href="http://www.ducknextdoor.com/blog/index.php/2012/05/short-fuse-multiplayer-bomberman/">Ducknextdoor</a> wrote on <em>May 28, 2012</em> about the project:</p>
+<blockquote>
+<p>Short Fuse is multiplayer bomberman you play with your online buddies at playShortFuse.com. Players can also challenge their facebook friends and post automatically tracked win tallies to their walls.</p>
+<p>Choose from 4 different bomberman characters (white, red, green and blue) and blast your way through the barriers in randomly generated maps, collecting power-ups as you duel to explosive victory or defeat.</p>
+<p>Gloat your victories and other commentary via chat included in the game. This clever HTML5 arcade action game is free to play, just click the button below to open the game in a new window:</p>
+</blockquote>
+<p>{#</p>
+<hr>
+<!-- <iframe src="http://shortfuse.cri5ti.com/monitor/" scrolling="no" style="width: 100%; height: 150px; border: none;"></iframe> -->
+<!-- [play]: http://shortfuse.cri5ti.com -->
+<p>#}</p>
+]]></content>
+        <summary type="html">
+            <![CDATA[An HTML5 Bomberman clone using node.js, socket.io, Backbone, Underscore, jQuery, CSS3 (via Compass + Sass)]]>
+        </summary>
+
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+        <category term="socket.io" scheme="http://cri5ti.com/tags/socket.io/"/>
+        
+        <category term="backbone" scheme="http://cri5ti.com/tags/backbone/"/>
+        
+        <category term="underscore" scheme="http://cri5ti.com/tags/underscore/"/>
+        
+        <category term="jQuery" scheme="http://cri5ti.com/tags/jQuery/"/>
+        
+        <category term="CSS3" scheme="http://cri5ti.com/tags/CSS3/"/>
+        
+        <category term="SASS" scheme="http://cri5ti.com/tags/SASS/"/>
+        
+        <category term="Cancelled projects" scheme="http://cri5ti.com/tags/Cancelled-projects/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Adobe Illustrator: Collapse all layers in Illustrator]]></title>
+        <link href="http://cri5ti.com/projects/2011/10/08/Collapse-all-layers-in-Illustrator/"/>
+        <id>http://cri5ti.com/projects/2011/10/08/Collapse-all-layers-in-Illustrator/</id>
+        <published>2011-10-08T11:00:00+00:00</published>
+        <updated>2011-10-08T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<hr>
+<h1 id="update-">Update:</h1>
+<p><em>Starting with </em><a href="https://helpx.adobe.com/illustrator/using/whats-new-17-1.html">Adobe Illustrator CC 17.1</a><em>, layers remember open/closed state, making the tool described in this post unnecessary.</em></p>
+<hr>
+<p>{% img 'preview.png' %}</p>
+<p>How much time have you wasted by collapsing the layers every time you open that <em>50-layer-Illustrator-file</em>?</p>
+<p>Sadly, Illustrator CS5 <em>(Update: CS6 or CC either)</em> can't remember the states of the layers between saves, so every time you open a file, all the layers are expanded, so you have to waste a few good clicks to close them before you are ready for action.</p>
+<p>If you don't care at all about this, just stop reading and get back to work!</p>
+<p>I was really annoyed by this for a very long time, and I decided to do something about it.</p>
+<p>I don't know if you've heard about this, but if you hold the <code>ALT</code> key while you click to expand or collapse a layer, it will do this for all the sub-layers inside. That's great, so that means that all you have to do is put everything in one layer, and then just <code>ALT</code>+click that when you open your file, and you're done.</p>
+<p>Sadly, there is a catch, this will not work if the sub-layers are hidden or locked. If you don't usually hide or lock layers, then you're already set: <strong>just use <code>ALT</code>+click and you're done</strong>.</p>
+<hr>
+<p>For the rest of us, I present you my extension, <code>AI Tools v1.0.0</code>, with only one tool - Collapse All.</p>
+<p>After installing the extension using the <em>Extension Manager</em>, you will find the <em>Collapse All</em> panel in the Window > Extensions menu.
+The panel will help you make all the layers visible and unlock them, so you can ALT+click all the top layers to collapse everything.</p>
+<p>{% img 'img1b.png' %}</p>
+<p>Here are some layers in a file I just opened:</p>
+<p>{% img 'img1.png' %}</p>
+<p>First click on the <em>(1) Make all visible</em> button, then (2) <code>ALT</code>+click on the top layers to collapse:</p>
+<p>{% img 'img2.png' %}</p>
+<p>Last step, press <em>(3) Restore</em> button to get back to the initial visibility and lock state.</p>
+<p>{% img 'img3.png' %}</p>
+<p><em>Elapsed time: 5 seconds.</em></p>
+<p>Please note that I actually expanded the top layers again in my previous picture, but without holding ALT this time, so I can show you that all the sub-layers are all nice and hmm... colapsed.</p>
+<h3 id="and-here-is-the-extension-aitools-1-0-0-zxp-http-code-google-com-p-ai-tools-downloads-detail-name-aitools-1-0-0-zxp-">And here is the extension: <a href="http://code.google.com/p/ai-tools/downloads/detail?name=AiTools-1.0.0.zxp">AiTools-1.0.0.zxp</a></h3>
+<p>Currently I have only tested it with Adobe Illustrator CS5 and CS6, but</p>
+<p>When I'll get some more free time, I'll create a nice panel for my other script: <a href="/2011/10/Export-layers-in-Illustrator/">ai-layers-export</a>.</p>
+<p>Thanks for reading, and let me know if you have any problems (on any topic related to Illustrator missing features).</p>
+]]></content>
+        <summary type="html">
+            <![CDATA[ Update:
+Starting with Adobe Illustrator CC 17.1, layers remember open/closed state, making the tool described in this post unnecessary.
+
+
+How much time have you wasted by collapsing the layers every time you open that 50-layer-Illustrator-file?
+Sadly, Illustrator CS5 (Update: CS6 or CC either) can't remember the states of the layers between saves,...]]>
+        </summary>
+
+        
+        <category term="Adobe Illustrator" scheme="http://cri5ti.com/tags/Adobe-Illustrator/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Ai Layers Export - An Adobe Illustrator script to export designs by layers.]]></title>
+        <link href="http://cri5ti.com/projects/2011/10/07/Export-layers-in-Illustrator/"/>
+        <id>http://cri5ti.com/projects/2011/10/07/Export-layers-in-Illustrator/</id>
+        <published>2011-10-07T11:00:00+00:00</published>
+        <updated>2011-10-07T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<h1 id="what-is-it">What is it</h1>
+<p>This script is based on Jon Hicks original <a href="http://www.hicksdesign.co.uk/journal/illustrator-exporting-layers-to-png">SaveLayersAsPNG</a> script which exports the top layers one by one.</p>
+<p>When you're working on some big UI designs, you usually have lots of layers and sublayers, things that have to always stay visible, or some more complex scenarios. This script will export layers recursively based on some flags at the end of the layer name.</p>
+<h1 id="layer-flags">Layer flags</h1>
+<p>You can add a special flag at the end of a layer to control it's rendering:</p>
+<ul>
+<li><p><strong><code>(+)</code> - always visible</strong> - good for backgrounds, headers and footers, ...</p>
+</li>
+<li><p><strong><code>(-)</code> - ignore layer</strong></p>
+</li>
+<li><p><strong><code>(~)</code> - popup layer</strong> - useful for overlays and popups, the script will export once with the layer hidden, and once visible.</p>
+</li>
+<li><p><em>no flag</em> -</p>
+</li>
+</ul>
+<h1 id="example">Example</h1>
+<p>{% img 'overlay.png' %}
+{% img 'layers.png' %}</p>
+<h2 id="exported-files-">Exported files:</h2>
+<pre><code><span class="hljs-function"><span class="hljs-title">acme-home-hovering-</span><span class="hljs-params">(~)</span></span><span class="hljs-class">.png</span>
+<span class="hljs-function"><span class="hljs-title">acme-home-popup-</span><span class="hljs-params">(~)</span></span><span class="hljs-class">.png</span>
+acme-home<span class="hljs-class">.png</span>
+<span class="hljs-function"><span class="hljs-title">acme-product-big-</span><span class="hljs-params">(~)</span></span><span class="hljs-class">.png</span>
+acme-product.png
+</code></pre><div class="img-grid columns-3">
+    {% img 'acme-home-hovering-~.png' %}
+    {% img 'acme-home-popup-~.png' %}
+    {% img 'acme-home.png' %}
+    {% img 'acme-product-big-~.png' %}
+    {% img 'acme-product.png' %}
+</div>
+
+<h2 id="get-it">Get it</h2>
+<p>Download the extension from <a href="https://github.com/cri5ti/ai-layers-export">github</a>.</p>
+]]></content>
+        <summary type="html">
+            <![CDATA[What is it
+This script is based on Jon Hicks original SaveLayersAsPNG script which exports the top layers one by one.
+When you're working on some big UI designs, you usually have lots of layers and sublayers, things that have to always stay visible, or some more complex scenarios. This script will...]]>
+        </summary>
+
+        
+        <category term="Adobe Illustrator" scheme="http://cri5ti.com/tags/Adobe-Illustrator/"/>
+        
+        <category term="Ai Tools" scheme="http://cri5ti.com/tags/Ai-Tools/"/>
+        
+    </entry>
+
+    
+
+    
+</feed>

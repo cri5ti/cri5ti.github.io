@@ -1,0 +1,157 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font: 600 14px 'PT Sans';
+  margin-top: 1.5em;
+  margin-bottom: 0;
+}
+h1 {
+  font-size: 150%;
+}
+h2 {
+  font-size: 140%;
+}
+h3 {
+  font-size: 130%;
+}
+h4 {
+  font-size: 120%;
+}
+h5 {
+  font-size: 110%;
+}
+h6 {
+  font-size: 100%;
+}
+p,
+pre,
+blockquote {
+  margin: 1.5em 0;
+}
+p {
+  text-align: justify;
+}
+p + ul {
+  margin-top: -1em;
+}
+a {
+  color: #00aa00;
+}
+a:hover {
+  background: rgba(102, 102, 102, 0.1);
+  text-shadow: 0 1px #fff;
+}
+ul li {
+  list-style: circle;
+}
+hr {
+  border: none;
+  height: 1px;
+  background: #ddd;
+  margin: 2.5em 0;
+}
+p code,
+li code {
+  font: 14px 'Ubuntu Mono', monospace;
+  background: #eee;
+  padding: 0 .35em;
+  text-shadow: 0 1px #fff;
+}
+pre {
+  border-left: solid 2px #ccc;
+  margin-left: -20px;
+  padding-left: 20px;
+}
+code {
+  font: 14px 'Ubuntu Mono', monospace;
+  font-weight: inherit;
+}
+aside {
+  right: 0;
+  position: absolute;
+  font: 12px 'PT Sans';
+  width: 180px;
+}
+p img,
+video {
+  display: block;
+  max-width: 100%;
+  margin: auto;
+}
+figure {
+  position: relative;
+}
+figure figcaption {
+  font: 400 12px/24px Open Sans;
+  line-height: 1.25em;
+  margin: 5px;
+  text-align: justify;
+}
+figure aside {
+  top: 50%;
+  right: -200px;
+}
+blockquote {
+  margin-left: 30px;
+  position: relative;
+  color: #00aa00;
+}
+blockquote:before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30px;
+  width: 4px;
+  content: '';
+  background: repeating-linear-gradient(125deg, #ffffff, #ffffff 4px, #00aa00 4px, #00aa00 8px);
+}
+.img-grid {
+  font-size: 0;
+}
+.img-grid img,
+.img-grid figure {
+  position: relative;
+  vertical-align: top;
+}
+@media (min-width: 960px) {
+  .img-grid img,
+  .img-grid figure {
+    display: inline-block;
+    margin: 0 50px 50px 0;
+    width: 335px;
+  }
+  .img-grid img:nth-child(2n),
+  .img-grid figure:nth-child(2n) {
+    margin: 0;
+  }
+}
+@media (max-width: 960px) {
+  .img-grid img,
+  .img-grid figure {
+    max-width: 100%;
+    margin: 5px;
+  }
+}
+.img-grid figure img {
+  width: 100%;
+  margin: 0;
+  display: block;
+}
+.section.img-right img {
+  max-width: 200px;
+  float: right;
+  margin-left: 25px;
+}
+.section.img-right:after {
+  content: '';
+  clear: both;
+  display: block;
+}
+img.enlarge:hover {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transform: translate(0, -1px) scale(1.005, 1.005);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
