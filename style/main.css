@@ -377,7 +377,7 @@ aside {
   font: 12px 'PT Sans';
   width: 180px;
 }
-p img,
+img,
 video {
   display: block;
   max-width: 100%;

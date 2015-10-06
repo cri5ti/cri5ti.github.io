@@ -80,14 +80,14 @@ hosting is free, and very simple, just one..." />
 started to appreciate the simplicity of deploying a bunch of files and be done with it. 
 With the <a href="https://pages.github.com/">GitHub Pages</a>, the whole process becomes even more attractive, as even the 
 hosting is free, and very simple, just one push away.</p>
-<p>While any existing solution works well, I'm a JavaScript guy, and I want to be able to customise everything to my liking. 
+<p>While any existing solution works well, I&#39;m a JavaScript guy, and I want to be able to customise everything to my liking. 
 <a href="hexo">Hexo</a> was a good start, but we can do something better.</p>
 <p>In the following post I will present <em>Forge</em>, my static generator that powers this website.</p>
 <h2 id="tree-structure">Tree structure</h2>
 <p>In Forge all data is organised in a tree structure, with each node having one of the basic types:</p>
 <ul>
 <li><strong>text</strong>: such as a static page, or a blog post.</li>
-<li><strong>data</strong>: stores arbitrary data (we'll come to this later)</li>
+<li><strong>data</strong>: stores arbitrary data (we&#39;ll come to this later)</li>
 <li><strong>namespace</strong>: groups related nodes together. Namespaces inherit from their parents.</li>
 </ul>
 <p>The default file processors are:</p>
@@ -114,7 +114,7 @@ hosting is free, and very simple, just one push away.</p>
 
 <hr/>
 
-<p><em>Forge</em> doesn't have any implicit behaviour on how to generate anything, really. You have to write your own 
+<p><em>Forge</em> doesn&#39;t have any implicit behaviour on how to generate anything, really. You have to write your own 
 tree parsers that generates whatever you want.</p>
 <p>Here is an example of how blog posts may be processed: </p>
 <pre><code class="lang-js">blog.<span class="hljs-keyword">post</span>(function(blog) {
@@ -132,7 +132,7 @@ tree parsers that generates whatever you want.</p>
 </code></pre>
 <figure>
     <img src="/web/2015/09/25/My-static-generator/step3.png"/>
-    <aside>Here's the structure of a blog post after processing.</aside>
+    <aside>Here&#39;s the structure of a blog post after processing.</aside>
 </figure>
 
 <hr>
@@ -148,14 +148,14 @@ In our example blog, pages are generated for valid posts, tags, categories, arch
 <p>For templates, I use <a href="https://mozilla.github.io/nunjucks/">Nunjucks</a>, an amazing template engine from Mozilla, which besides partials and includes,
 also provides a nice inheritance feature via <a href="http://mozilla.github.io/nunjucks/templating.html#template-inheritance">blocks</a>.</p>
 <h1 id="conclusion">Conclusion</h1>
-<p>I really like this approach in generating the content, and I don't regret spending the time. 
+<p>I really like this approach in generating the content, and I don&#39;t regret spending the time. 
 It reminds me if my graduation project, a Content Management System based on a similar tree structure, so I had fun with it.</p>
 <p>If I will have the time to iterate on the protect, I hope I can reduce the complexity of node processing, 
 currently new data gets appended in new nodes, as I hoped I would be able to regenerate only affected nodes when filesystem changes, 
 but that seemed to be more complex than I expected, and irrelevant at the moment as rebuilding everything is fast enough.</p>
 <p>Another point I would like to work is the way tree scanning work. Currently the namespace iteration is not contrained, 
 you have to implement the iterators to deep search for the nodes of specific types and break when you found what you need. </p>
-<p>I don't expect I will release the project any time soon, as it's more of a personal toy, complex and messy in places.  </p>
+<p>I don&#39;t expect I will release the project any time soon, as it&#39;s more of a personal toy, complex and messy in places.  </p>
 <p>Have you found this interesting? Let me know, and I might post some more details about it. </p>
 
 	</div>

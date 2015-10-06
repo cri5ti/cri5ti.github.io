@@ -10,10 +10,10 @@
 
 
 	
-	<meta name="description" content="So, I&#39;ve been having fun with some OpenGL, I&#39;m working on a terrain engine, we&#39;ll see where it goes...
+	<meta name="description" content="So, I&amp;#39;ve been having fun with some OpenGL, I&amp;#39;m working on a terrain engine, we&amp;#39;ll see where it goes...
 
 
-So far, I&#39;ve got:
+So far, I&amp;#39;ve got:
 
 voxel terrain renderer, tesselated with marching cubes. 
 
@@ -86,10 +86,10 @@ triplanar mapping..." />
 	</header>
 
 	<div class="content" itemprop="description articleBody">
-		<p>So, I've been having fun with some OpenGL, I'm working on a terrain engine, we'll see where it goes...</p>
-<p><img src="/game/2015/08/25/terrain-engine/1.jpg" class="enlarge"/></p>
+		<p>So, I&#39;ve been having fun with some OpenGL, I&#39;m working on a terrain engine, we&#39;ll see where it goes...</p>
+<img src="/game/2015/08/25/terrain-engine/1.jpg" class="enlarge"/>
 <hr>
-<p>So far, I've got:</p>
+<p>So far, I&#39;ve got:</p>
 <ul>
 <li><p>voxel terrain renderer, tesselated with <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a>. </p>
 </li>
@@ -101,10 +101,10 @@ triplanar mapping..." />
 </li>
 </ul>
 <h2 id="performance-">Performance:</h2>
-<p>Currently, the chunks are of fixed size, and I can generate and render about 7^3 chunks around the player, while you're moving around.</p>
+<p>Currently, the chunks are of fixed size, and I can generate and render about 7^3 chunks around the player, while you&#39;re moving around.</p>
 <h2 id="immediate-future-plans-">Immediate future plans:</h2>
 <ul>
-<li><p>rewrite the <code>ChunkManager</code> to use the Octree to determine views in frustum, and apply LOD based on view distance. Currently I'm using a <code>std::unordered_map</code> hashed by chunk coordinates, which is not very fast. (I'm just for-looping around the player to get/generate visible chunks).</p>
+<li><p>rewrite the <code>ChunkManager</code> to use the Octree to determine views in frustum, and apply LOD based on view distance. Currently I&#39;m using a <code>std::unordered_map</code> hashed by chunk coordinates, which is not very fast. (I&#39;m just for-looping around the player to get/generate visible chunks).</p>
 </li>
 <li><p>use LOD chunks to increase the view distance.</p>
 </li>
