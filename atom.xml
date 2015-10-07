@@ -4,7 +4,7 @@
     <subtitle><![CDATA[A dev&#39;s rants]]></subtitle>
     <link href="/atom.xml" rel="self"/>
     <link href="http://cri5ti.com"/>
-    <updated>2015-10-06T12:34:05+00:00</updated>
+    <updated>2015-10-07T09:32:49+00:00</updated>
     <id>http://cri5ti.com</id>
 
     <author>
@@ -57,6 +57,19 @@ ga<span class="hljs-list">(<span class="hljs-variable">'send</span>', <span clas
 <hr>
 <p>After:</p>
 {% img src='report_after.png', class='enlarge' %}
+<hr>
+<h1 id="update-">Update:</h1>
+<p>Reddit user Groggie posted <a href="https://www.reddit.com/r/analytics/comments/3npc39/cleanup_spam_in_google_analytics_without_long/cvqcjo1">a very insightful comment</a> in reply to my article on <a href="https://www.reddit.com/r/analytics">/r/analytics</a>: </p>
+<blockquote>
+<p>What you&#39;re doing is exactly a hostname filter. Instead of editing the code to inject an ID (like &#39;bacon&#39;) into the site itself, I&#39;d recommend just using a regex match for your hostname and create a new view/filter with that.</p>
+<p>This method will only stop &quot;ghost&quot; spambots - so the spambots that actually visit your site (semalt), will need to be blocked another way.</p>
+</blockquote>
+<p>Oh, how I wished I would have known about the hostname property before.</p>
+<p>Indeed, whenever analytics tracks your page, it also sends out the domain on which it was viewed.
+So it seems a better way to do the ghost spam filtering would be to just add a filter on your hostname:</p>
+{% img src='ga-filter-hostname.png', class='enlarge' %}
+<p>I&#39;ve noticed that using this method, visits from Google Cache, or via Google Translate will be filtered out as
+they&#39;re going to have a different hostname, but that&#39;s not a big deal for me.</p>
 ]]></content>
         <summary type="html">
             <![CDATA[For the past year or so, Google Analytics has been showing complete garbage for my site, and if you&#39;re here, 

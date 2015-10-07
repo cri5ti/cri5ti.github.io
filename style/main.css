@@ -340,7 +340,7 @@ p + ul {
   margin-top: -1em;
 }
 a {
-  color: #00aa00;
+  color: #0000aa;
 }
 a:hover {
   background: rgba(102, 102, 102, 0.1);
@@ -397,18 +397,24 @@ figure aside {
   right: -200px;
 }
 blockquote {
-  margin-left: 30px;
+  background: rgba(170, 0, 102, 0.08);
+  font-style: italic;
+  padding: 15px 30px 15px 45px;
   position: relative;
-  color: #00aa00;
+  color: #aa0066;
 }
 blockquote:before {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -30px;
-  width: 4px;
-  content: '';
-  background: repeating-linear-gradient(125deg, #ffffff, #ffffff 4px, #00aa00 4px, #00aa00 8px);
+  top: 25px;
+  left: 10px;
+  content: open-quote;
+  font-size: 3em;
+}
+blockquote p:first-child {
+  margin-top: 0;
+}
+blockquote p:last-child {
+  margin-bottom: 0;
 }
 .img-grid {
   font-size: 0;

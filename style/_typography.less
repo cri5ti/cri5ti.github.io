@@ -88,21 +88,21 @@ figure {
 }
 
 blockquote {
-	margin-left: 30px;
+	background: fade(@colorQuote, 8%);
+	font-style: italic;
+	padding: 15px 30px 15px 45px;
 	position: relative;
-	color: @colorAccent;
+	color: @colorQuote;
+
 	&:before {
 		position: absolute;
-		top: 0; bottom: 0; left: -30px; width: 4px;
-		content: '';
-		background: repeating-linear-gradient(
-			125deg,
-			#fff,
-			#fff 4px,
-			@colorAccent 4px,
-			@colorAccent 8px
-		);
+		top: 25px; left: 10px;
+		content: open-quote;
+		font-size: 3em;
 	}
+
+	p:first-child { margin-top: 0; }
+	p:last-child { margin-bottom: 0; }
 }
 
 .img-grid {
