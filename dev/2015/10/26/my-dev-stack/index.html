@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="/style/main.css"/>
+<link href="/blog/atom.xml" type="application/atom+xml" rel="alternate" title="Blog" />
+
+
+	
+	<meta name="description" content="How would you like to be able to run one command and have your entire development stack up and running? 
+./infra up
+
+And this starts my database service, runs the server, compiles the client modules, and then watches any files 
+for changes and restarts the server if needed, reloads the page..." />
+	<meta name="keywords" content="Docker,node.js," />
+
+	<title> A new dev stack - Cristi Mihai </title>
+</head>
+<body>
+	
+<div id="page">
+	
+
+
+	<header>
+		<div class="site-header">
+	<div class="logo">
+		<h1><a href="/" class="cri5ti">Cristi Mihai</a></h1>
+		
+		<h2><a href="/dev">Dev</a></h2>
+		
+
+	</div>
+	<ul class="menu">
+		<!--<li><a href="/projects">Personal</a></li>-->
+		<!--<li><a href="/archive">Archive</a></li>-->
+		<!--<li><a href="/about">About</a></li>-->
+	</ul>
+</div>
+	</header>
+
+	<div class="main">
+		
+
+<article class="post" itemscope itemtype="http://schema.org/Article">
+
+	<header>
+		<div class="h1-row">
+			<div class="h1-box">
+				
+				<h1 itemprop="name headline">A new dev stack</h1>
+			</div>
+		</div>
+		<h2>Docker, WebPack</h2>
+
+		<div class="meta">
+			
+			<em><time itemprop="datePublished" datetime="2015-10-26T12:00:00+00:00">26 October 2015</time></em>
+			
+			<span class="separator"></span>
+			
+			<span>by</span>
+			<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+			
+			<span class="separator"></span>
+			<span>in</span>
+			<a href="/dev">Dev</a>
+
+			
+			<div class="tags">
+				<span>Tagged: </span>
+				
+				  <a href="/dev/tags/Docker">Docker</a> | <a href="/dev/tags/node.js">node.js</a>
+			</div>
+			
+		</div>
+	</header>
+
+	<div class="content" itemprop="description articleBody">
+		<p>How would you like to be able to run one command and have your entire development stack up and running? </p>
+<pre><code class="lang-bash">./infra <span class="hljs-keyword">up</span>
+</code></pre>
+<p>And this starts my database service, runs the server, compiles the client modules, and then watches any files 
+for changes and restarts the server if needed, reloads the page or just hot updates the styles.</p>
+<p>And the best part is, you can just checkout the code and do this on any system.</p>
+<p>I&#39;m doing this with:</p>
+<h2 id="-docker-https-www-docker-com-"><a href="https://www.docker.com/">Docker</a></h2>
+<p>Runs an app in it&#39;s own space; think of it like running a VM, but in native speed.</p>
+<p>Lots of examples, projects and videos. I recommend watching some videos on Youtube, just make sure to be recent, as it 
+had a very rapid growth in the last year or so.</p>
+<p><em>Dockerfile</em>:</p>
+<pre><code class="lang-Dockerfile"><span class="hljs-built_in">FROM</span>    ubuntu:<span class="hljs-number">14.04</span>       
+
+<span class="hljs-built_in">RUN</span>     <span class="bash">sudo apt-get install --yes curl
+</span><span class="hljs-built_in">RUN</span>     <span class="bash">curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
+</span><span class="hljs-built_in">RUN</span>     <span class="bash">sudo apt-get install --yes nodejs
+</span>
+<span class="hljs-built_in">COPY</span>    <span class="bash">. /nodeapp
+</span>
+<span class="hljs-built_in">WORKDIR</span> <span class="bash">/nodeapp
+</span>
+<span class="hljs-built_in">RUN</span>     <span class="bash">npm install
+</span>
+<span class="hljs-built_in">CMD</span>     <span class="bash">[<span class="hljs-string">"npm"</span>, <span class="hljs-string">"start"</span>]</span>
+</code></pre>
+<p>Starting from a base image, install nodejs, copy the source files in the image, install dependencies and run it.
+On development, I use a variation on this where I mount the source code directly in the container without copying it (via
+<a href="https://docs.docker.com/userguide/dockervolumes/">volumes</a>), so you can change the code and reload.</p>
+<h2 id="-webpack-https-webpack-github-io-"><a href="https://webpack.github.io/">Webpack</a></h2>
+<p>Webpack is a module bundler, it takes your many js files and bundles them together, like require.js, but it was much easier,
+faster, and comes with many other goodies, such as hot module replacement (save your code and it updates in your browser immediately).</p>
+<p>I&#39;ve previously used a require.js with grunt workflow on a rather massive project, and the compile time was getting very slow,
+brittle configuration of the module dependencies.</p>
+<p>I&#39;m still quite new on webpack, but I&#39;m loving it so far.
+With it&#39;s loaders, such as babel-loader, adopting ES6 is a breeze.</p>
+<h2 id="-docker-compose-https-docs-docker-com-compose-"><a href="https://docs.docker.com/compose/">Docker-compose</a></h2>
+<p>Manage a collection of Docker containers and link them together.</p>
+<p>Here&#39;s an example of tying together several containers:</p>
+<pre><code class="lang-yaml"><span class="hljs-attribute">redis</span>:
+    <span class="hljs-attribute">build</span>: db/redis/
+
+<span class="hljs-attribute">mongo</span>:
+    <span class="hljs-attribute">build</span>: db/mongo/
+
+<span class="hljs-attribute">website</span>:
+    <span class="hljs-attribute">build</span>: app/website/
+    <span class="hljs-attribute">links</span>:
+     - redis
+     - mongo
+</code></pre>
+<p>Here, 3 containers are linked together, and running <code>docker-compose up</code> builds all the images and starts the containers. </p>
+<p>For development, I extend this with some more goodies:</p>
+<pre><code class="lang-yaml"><span class="hljs-symbol">mongo:</span>
+    <span class="hljs-comment"># expose the port to the host machine so I can easily connect to it with dev tools.</span>
+    <span class="hljs-symbol">ports:</span>
+     - <span class="hljs-string">"27017:27017"</span>                                
+
+<span class="hljs-symbol">website:</span>
+    <span class="hljs-comment"># mount some folders from the host for development:</span>
+    <span class="hljs-comment"># - source code</span>
+    <span class="hljs-comment"># - my own node_modules (I use npm link with my own modules)</span>
+    <span class="hljs-symbol">volumes:</span>                                        
+     - ./app/<span class="hljs-symbol">website:</span>/nodeapp                       
+     - ../modules/<span class="hljs-symbol">:/usr/local/lib/node_modules/</span>     
+
+    <span class="hljs-comment"># expose the app and webpack-dev-server to host</span>
+    <span class="hljs-symbol">ports:</span>
+     - <span class="hljs-string">"8080:8080"</span>                                  
+     - <span class="hljs-string">"8090:8090"</span>                                  
+
+    <span class="hljs-comment"># nodemon for server restart on code changes &amp; webpack-dev-server to serve client modules</span>
+    <span class="hljs-symbol">command:</span> &gt;                                      
+            nodemon -w server/ server/index.js
+            &amp; npm run dev
+
+    <span class="hljs-comment"># trim logging</span>
+    <span class="hljs-symbol">log_driver:</span> <span class="hljs-string">"json-file"</span>                         
+    <span class="hljs-symbol">log_opt:</span>
+        max-<span class="hljs-symbol">size:</span> <span class="hljs-string">"100k"</span>
+        max-<span class="hljs-symbol">file:</span> <span class="hljs-string">"1"</span>
+</code></pre>
+<p>Then you can make a quick bash script:</p>
+<pre><code class="lang-bash">FILES=<span class="hljs-string">"-f infra.base.yaml -f infra.dev.yaml"</span>
+
+<span class="hljs-keyword">if</span> [ <span class="hljs-string">"<span class="hljs-variable">$ENV</span>"</span> = <span class="hljs-string">"PROD"</span> ]; <span class="hljs-keyword">then</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-operator">-e</span> <span class="hljs-string">"Environment: \e[1;32mPRODUCTION\e[m"</span>
+    FILES=<span class="hljs-string">"-f infra.base.yaml"</span>
+<span class="hljs-keyword">else</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-operator">-e</span> <span class="hljs-string">"Environment: \e[1;31mDEV\e[m"</span>
+    FILES=<span class="hljs-string">"-f infra.base.yaml -f infra.dev.yaml"</span>
+<span class="hljs-keyword">fi</span>
+
+docker-compose <span class="hljs-variable">$FILES</span> <span class="hljs-variable">$@</span>
+</code></pre>
+<p>and use it: </p>
+<pre><code>./infra <span class="hljs-keyword">up</span>
+</code></pre><p>and then deploy it:</p>
+<pre><code><span class="hljs-keyword">export</span> <span class="hljs-literal">ENV</span>=PROD
+./infra up
+</code></pre>
+	</div>
+
+	<footer>
+		
+		<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+	var disqus_shortname = 'cri5ti';
+	var disqus_identifier = '/dev/2015/10/26/my-dev-stack';
+	var disqus_title = 'A new dev stack';
+	var disqus_url = 'http://cri5ti.com/dev/2015/10/26/my-dev-stack/';
+
+	function run_disqus_script(disqus_script){
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	}
+	run_disqus_script('embed.js');
+</script>
+		
+	</footer>
+
+</article>
+
+
+
+
+	</div>
+
+	<footer>
+		Copyright &copy; 2012 - 2015 - Cristi Mihai
+	</footer>
+</div>
+
+
+
+	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-43450851-1', 'auto');
+  ga('set', 'dimension1', 'morebacon');
+  ga('send', 'pageview');
+</script>
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/script/mybox.js"></script>
+</body>
+</html>

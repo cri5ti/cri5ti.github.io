@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="/style/main.css"/>
+<link href="/blog/atom.xml" type="application/atom+xml" rel="alternate" title="Blog" />
+
+
+	
+	<meta name="description" content=" A naive approach in rendering the chunks in a view frustum would result in this example in about 230 chunks.
+
+
+
+
+We can take advantage of the perspective, and render chunks at different level of details based on the distance to the camera.
+In the above example, we can considerably reduce the..." />
+	<meta name="keywords" content="LOD,Octree," />
+
+	<title> LOD chunked rendering - Cristi Mihai </title>
+</head>
+<body>
+	
+<div id="page">
+	
+
+
+	<header>
+		<div class="site-header">
+	<div class="logo">
+		<h1><a href="/" class="cri5ti">Cristi Mihai</a></h1>
+		
+		<h2><a href="/game">Having fun writing a game engine.</a></h2>
+		
+
+	</div>
+	<ul class="menu">
+		<!--<li><a href="/projects">Personal</a></li>-->
+		<!--<li><a href="/archive">Archive</a></li>-->
+		<!--<li><a href="/about">About</a></li>-->
+	</ul>
+</div>
+	</header>
+
+	<div class="main">
+		
+
+<article class="post" itemscope itemtype="http://schema.org/Article">
+
+	<header>
+		<div class="h1-row">
+			<div class="h1-box">
+				
+				<h1 itemprop="name headline">LOD chunked rendering</h1>
+			</div>
+		</div>
+		
+
+		<div class="meta">
+			
+			<em><time itemprop="datePublished" datetime="2015-09-27T11:00:00+00:00">27 September 2015</time></em>
+			
+			<span class="separator"></span>
+			
+			<span>by</span>
+			<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+			
+			<span class="separator"></span>
+			<span>in</span>
+			<a href="/game">A game engine</a>
+
+			
+			<div class="tags">
+				<span>Tagged: </span>
+				
+				  <a href="/game/tags/LOD">LOD</a> | <a href="/game/tags/Octree">Octree</a>
+			</div>
+			
+		</div>
+	</header>
+
+	<div class="content" itemprop="description articleBody">
+		<div class="section img-right">
+<img src="/game/2015/09/27/chunked-LOD/grid.svg"/>
+<p>A naive approach in rendering the chunks in a view frustum would result in this example in about <em>230 chunks</em>.</p>
+</div>
+<hr>
+<div class="section img-right">
+<img src="/game/2015/09/27/chunked-LOD/lod.svg"/>
+<p>We can take advantage of the perspective, and render chunks at different level of details based on the distance to the camera.</p>
+<p>In the above example, we can considerably reduce the number of chunks to <strong>17</strong>.</p>
+<p>Because of the perspective, each chunk will have the same width on screen (one chunk wide in the example), so we should have a constant chunk density on screen space.</p>
+</div>
+<hr>
+<p>An <a href="https://en.wikipedia.org/wiki/Octree">Octree</a> structure seems the perfect choice in building the chunk render list.</p>
+<div class="section img-right">
+<img src="/game/2015/09/27/chunked-LOD/quad.svg"/>
+<pre><code class="lang-cpp">template &lt;typename <span class="hljs-type">Data</span>&gt;
+struct Octree {
+    <span class="hljs-type">Data</span>* <span class="hljs-keyword">value</span>;
+    vec3 center;
+    <span class="hljs-built_in">float</span> <span class="hljs-built_in">size</span>;
+
+    Octree&lt;<span class="hljs-type">Data</span>&gt; *parent;
+    Octree&lt;<span class="hljs-type">Data</span>&gt; *children[<span class="hljs-number">8</span>];
+
+    <span class="hljs-built_in">int</span> level; 
+    <span class="hljs-built_in">int</span> <span class="hljs-built_in">index</span>; // child <span class="hljs-built_in">index</span> <span class="hljs-type">in</span> parent
+    bool leaf;
+};
+</code></pre>
+</div>
+<h2 id="building-the-octree">Building the octree</h2>
+<ol>
+<li>start from the biggest cell that contains the complete view frustum</li>
+<li>determine LOD based on distance to frustum</li>
+<li>if current cell level == computed LOD, then add chunk to render list</li>
+<li>if current cell level &lt; computed LOD, iterate children</li>
+</ol>
+<h3 id="1-determine-the-start-cell">1. Determine the start cell</h3>
+<p>For the first time, we start from an arbitrary cell in the octree.</p>
+<p>From here, we keep zooming out the octree (by navigating the parents) until our cell contains the whole view frustum.</p>
+<div class="section img-right">
+<img src="/game/2015/09/27/chunked-LOD/zoom-out.gif"/>
+<pre><code class="lang-cpp"><span class="hljs-keyword">while</span> (!chunkContainsCube(chunk, cameraPos, viewDistance)) {
+    <span class="hljs-built_in">c</span> = <span class="hljs-built_in">c</span>-&gt;getOrMakeParent(<span class="hljs-type">CHILD_LEFT_DOWN_BACK</span>);
+    <span class="hljs-built_in">c</span> = <span class="hljs-built_in">c</span>-&gt;getOrMakeParent(<span class="hljs-type">CHILD_RIGHT_UP_FRONT</span>);
+}
+</code></pre>
+</div>
+<hr>
+<p>While zooming out, we create 2 levels in the Octree, to ensure that we enlarge on all dimensions:</p>
+<img src="/game/2015/09/27/chunked-LOD/expansion.svg"/>
+<hr>
+<p>Next, we check if we can zoom in, by checking if any of the children contains the frustum completely.</p>
+<div class="section img-right">
+<img src="/game/2015/09/27/chunked-LOD/zoom-in.gif"/>
+<pre><code class="lang-cpp">again:
+<span class="hljs-keyword">for</span> (<span class="hljs-type">Chunk</span>* <span class="hljs-built_in">c</span> : chunk-&gt;children) {
+    <span class="hljs-keyword">if</span> (cubeContainsChunk(cameraPos, viewDistance, <span class="hljs-built_in">c</span>)) {
+        chunk = <span class="hljs-built_in">c</span>;
+        goto again;
+    }
+}
+</code></pre>
+</div>
+<hr>
+<p>Now we have determined our start octree cell for building our render list.</p>
+<hr>
+<h2 id="results">Results</h2>
+<p>Here are the chunks rendered in our engine:</p>
+<div class="img-grid">
+<figure>
+    <img src="/game/2015/09/27/chunked-LOD/screen1.png"/>
+    <figcaption>Only the chunks crossing the y=0 plane.</figcaption>
+</figure>
+<figure>
+    <img src="/game/2015/09/27/chunked-LOD/screen2.png"/>
+    <figcaption>All chunks</figcaption>
+</figure>
+</div>
+
+<hr>
+<video src="/game/2015/09/27/chunked-LOD/video.mp4" width="642" controls/>
+
+<hr>
+
+	</div>
+
+	<footer>
+		
+		<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+	var disqus_shortname = 'cri5ti';
+	var disqus_identifier = '/game/2015/09/27/chunked-LOD';
+	var disqus_title = 'LOD chunked rendering';
+	var disqus_url = 'http://cri5ti.com/game/2015/09/27/chunked-LOD/';
+
+	function run_disqus_script(disqus_script){
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	}
+	run_disqus_script('embed.js');
+</script>
+		
+	</footer>
+
+</article>
+
+
+	<div class="panel">
+		<h1>Also read:</h1>
+		<ul class="index also-read columns-2">
+			
+				
+
+	<li class="post" itemscope itemtype="http://schema.org/Article">
+		<header>
+			
+			<div class="meta">
+				<time itemprop="datePublished" datetime="2015-08-25T11:00:00+00:00">25 August 2015</time>
+			</div>
+			
+
+			
+			<h1 itemprop="name headline">
+				<a href="/game/2015/08/25/terrain-engine" itemprop="url"><b>Terrain rendering</b> </a>
+			</h1>
+
+			<div class="meta">
+				<span>in</span>
+				<a href="/game">A game engine</a>
+				
+				<span class="separator"></span>
+				<span>by</span>
+				<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+				
+			</div>
+		</header>
+
+		
+		<a href="/game/2015/08/25/terrain-engine">
+			<div class="img-main">
+				<div class="img-fit">
+					<img src="/game/2015/08/25/terrain-engine/header.jpg"/>
+				</div>
+			</div>
+		</a>
+		
+
+		<p itemprop="description">So, I&#39;ve been having fun with some OpenGL, I&#39;m working on a terrain engine, we&#39;ll see where it goes...
+
+
+So far, I&#39;ve got:
+
+voxel terrain renderer, tesselated with marching cubes. 
+
+the signed density function is generated from a few octaves of simplex noise.
+
+multithreaded chunk generation and tesselation with no world bounds.
+
+triplanar mapping...</p>
+
+		<a class="meta" href="http://cri5ti.com/game/2015/08/25/terrain-engine/#comments" itemprop="discussionUrl" class="comments count">
+			<span class="disqus-comment-count" data-disqus-identifier="/game/2015/08/25/terrain-engine" itemprop="commentsCount"></span>
+		</a>
+
+		<div class="meta">
+			
+		</div>
+	</li>
+
+
+			
+		</ul>
+	</div>
+
+
+
+	</div>
+
+	<footer>
+		Copyright &copy; 2012 - 2015 - Cristi Mihai
+	</footer>
+</div>
+
+
+
+	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-43450851-1', 'auto');
+  ga('set', 'dimension1', 'morebacon');
+  ga('send', 'pageview');
+</script>
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/script/mybox.js"></script>
+</body>
+</html>

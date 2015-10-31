@@ -146,6 +146,31 @@ body {
     width: 720px;
   }
 }
+#page > .main ul.index li.post.small {
+  font-size: 12px;
+  border-top: none;
+  margin: 0 0 2em 0;
+  padding: 0;
+}
+#page > .main ul.index li.post.small * {
+  line-height: 14px;
+}
+#page > .main ul.index li.post.small h1 {
+  font-size: 13px;
+  font-weight: normal;
+  margin: 4px 0;
+}
+#page > .main ul.index li.post.small h1 a {
+  color: #666;
+}
+#page > .main ul.index li.post.small p {
+  margin: 0;
+}
+#page > .main ul.index li.post:not(.small) {
+  border-bottom: solid 1px #eee;
+  margin-bottom: 2em;
+  padding-bottom: 2em;
+}
 #page > footer {
   margin-top: 24px;
   background: #eee;
@@ -230,20 +255,36 @@ ul.index > li.post > header h1 a {
 ul.index > li.post > header h1 a:hover {
   text-decoration: underline;
 }
-ul.index > li.post .img-main {
+ul.index > li.post:not(.small) .img-main {
   width: 200px;
   float: right;
   margin-left: 50px;
   margin-right: -150px;
   overflow: hidden;
 }
-ul.index > li.post .img-main .img-fit {
+ul.index > li.post:not(.small) .img-main .img-fit {
   width: 400px;
   margin-left: -100px;
   text-align: center;
 }
-ul.index > li.post .img-main img {
+ul.index > li.post:not(.small) .img-main img {
   height: 200px;
+  margin: auto;
+}
+ul.index > li.post.small .img-main {
+  width: 100px;
+  float: right;
+  margin-left: 50px;
+  margin-right: -150px;
+  overflow: hidden;
+}
+ul.index > li.post.small .img-main .img-fit {
+  width: 200px;
+  margin-left: -50px;
+  text-align: center;
+}
+ul.index > li.post.small .img-main img {
+  height: 100px;
   margin: auto;
 }
 ul.index > li.post .meta {

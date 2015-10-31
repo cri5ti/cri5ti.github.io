@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="/style/main.css"/>
+<link href="/blog/atom.xml" type="application/atom+xml" rel="alternate" title="Blog" />
+
+
+	
+	<meta name="description" content="Here I&amp;#39;m trying to build a quick monitoring app to collect, aggregate, store, and display data:  
+So far I&amp;#39;ve fleshed out the UI with some random fake data.
+I&amp;#39;ve already been able to collect Java profiling data over JMX from node.js, so the rest shouldn&amp;#39;t be much of a problem...." />
+	<meta name="keywords" content="node.js,d3.js," />
+
+	<title> Monitoring dashboard - Cristi Mihai </title>
+</head>
+<body>
+	
+<div id="page">
+	
+
+
+	<header>
+		<div class="site-header">
+	<div class="logo">
+		<h1><a href="/" class="cri5ti">Cristi Mihai</a></h1>
+		
+		<h2><a href="/dev">Dev</a></h2>
+		
+
+	</div>
+	<ul class="menu">
+		<!--<li><a href="/projects">Personal</a></li>-->
+		<!--<li><a href="/archive">Archive</a></li>-->
+		<!--<li><a href="/about">About</a></li>-->
+	</ul>
+</div>
+	</header>
+
+	<div class="main">
+		
+
+<article class="post" itemscope itemtype="http://schema.org/Article">
+
+	<header>
+		<div class="h1-row">
+			<div class="h1-box">
+				
+				<h1 itemprop="name headline">Monitoring dashboard</h1>
+			</div>
+		</div>
+		
+
+		<div class="meta">
+			
+			<em><time itemprop="datePublished" datetime="2015-10-11T11:00:00+00:00">11 October 2015</time></em>
+			
+			<span class="separator"></span>
+			
+			<span>by</span>
+			<a itemprop="author" href="http://cri5ti.com">Cristi Mihai</a>
+			
+			<span class="separator"></span>
+			<span>in</span>
+			<a href="/dev">Dev</a>
+
+			
+			<div class="tags">
+				<span>Tagged: </span>
+				
+				  <a href="/dev/tags/node.js">node.js</a> | <a href="/dev/tags/d3.js">d3.js</a>
+			</div>
+			
+		</div>
+	</header>
+
+	<div class="content" itemprop="description articleBody">
+		<p>Here I&#39;m trying to build a quick monitoring app to collect, aggregate, store, and display data:  </p>
+<p>So far I&#39;ve fleshed out the UI with some random fake data.</p>
+<p>I&#39;ve already been able to collect Java profiling data over JMX from node.js, so the rest shouldn&#39;t be much of a problem. </p>
+<p>For charts, I&#39;ve tried out several charting libraries, but ended up using the more general <a href="http://d3js.org">D3.js</a> library, 
+and it&#39;s been an amazing learning opportunity.</p>
+<img src="/dev/2015/10/11/Dashboard/dashboard.png" class="enlarge"/>
+
+	</div>
+
+	<footer>
+		
+		<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+	var disqus_shortname = 'cri5ti';
+	var disqus_identifier = '/dev/2015/10/11/Dashboard';
+	var disqus_title = 'Monitoring dashboard';
+	var disqus_url = 'http://cri5ti.com/dev/2015/10/11/Dashboard/';
+
+	function run_disqus_script(disqus_script){
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	}
+	run_disqus_script('embed.js');
+</script>
+		
+	</footer>
+
+</article>
+
+
+
+
+	</div>
+
+	<footer>
+		Copyright &copy; 2012 - 2015 - Cristi Mihai
+	</footer>
+</div>
+
+
+
+	
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-43450851-1', 'auto');
+  ga('set', 'dimension1', 'morebacon');
+  ga('send', 'pageview');
+</script>
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/script/mybox.js"></script>
+</body>
+</html>

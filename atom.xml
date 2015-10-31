@@ -4,7 +4,7 @@
     <subtitle><![CDATA[A dev&#39;s rants]]></subtitle>
     <link href="/atom.xml" rel="self"/>
     <link href="http://cri5ti.com"/>
-    <updated>2015-10-07T09:32:49+00:00</updated>
+    <updated>2015-10-31T17:58:55+00:00</updated>
     <id>http://cri5ti.com</id>
 
     <author>
@@ -18,9 +18,271 @@
         
 
     <entry>
+        <title><![CDATA[A new dev stack - Docker, WebPack]]></title>
+        <link href="http://cri5ti.com/dev/2015/10/26/my-dev-stack/"/>
+        <id>http://cri5ti.com/dev/2015/10/26/my-dev-stack/</id>
+        <published>2015-10-26T12:00:00+00:00</published>
+        <updated>2015-10-26T12:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>How would you like to be able to run one command and have your entire development stack up and running? </p>
+<pre><code class="lang-bash">./infra <span class="hljs-keyword">up</span>
+</code></pre>
+<p>And this starts my database service, runs the server, compiles the client modules, and then watches any files 
+for changes and restarts the server if needed, reloads the page or just hot updates the styles.</p>
+<p>And the best part is, you can just checkout the code and do this on any system.</p>
+<p>I&#39;m doing this with:</p>
+<h2 id="-docker-https-www-docker-com-"><a href="https://www.docker.com/">Docker</a></h2>
+<p>Runs an app in it&#39;s own space; think of it like running a VM, but in native speed.</p>
+<p>Lots of examples, projects and videos. I recommend watching some videos on Youtube, just make sure to be recent, as it 
+had a very rapid growth in the last year or so.</p>
+<p><em>Dockerfile</em>:</p>
+<pre><code class="lang-Dockerfile"><span class="hljs-built_in">FROM</span>    ubuntu:<span class="hljs-number">14.04</span>       
+
+<span class="hljs-built_in">RUN</span>     <span class="bash">sudo apt-get install --yes curl
+</span><span class="hljs-built_in">RUN</span>     <span class="bash">curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
+</span><span class="hljs-built_in">RUN</span>     <span class="bash">sudo apt-get install --yes nodejs
+</span>
+<span class="hljs-built_in">COPY</span>    <span class="bash">. /nodeapp
+</span>
+<span class="hljs-built_in">WORKDIR</span> <span class="bash">/nodeapp
+</span>
+<span class="hljs-built_in">RUN</span>     <span class="bash">npm install
+</span>
+<span class="hljs-built_in">CMD</span>     <span class="bash">[<span class="hljs-string">"npm"</span>, <span class="hljs-string">"start"</span>]</span>
+</code></pre>
+<p>Starting from a base image, install nodejs, copy the source files in the image, install dependencies and run it.
+On development, I use a variation on this where I mount the source code directly in the container without copying it (via
+<a href="https://docs.docker.com/userguide/dockervolumes/">volumes</a>), so you can change the code and reload.</p>
+<h2 id="-webpack-https-webpack-github-io-"><a href="https://webpack.github.io/">Webpack</a></h2>
+<p>Webpack is a module bundler, it takes your many js files and bundles them together, like require.js, but it was much easier,
+faster, and comes with many other goodies, such as hot module replacement (save your code and it updates in your browser immediately).</p>
+<p>I&#39;ve previously used a require.js with grunt workflow on a rather massive project, and the compile time was getting very slow,
+brittle configuration of the module dependencies.</p>
+<p>I&#39;m still quite new on webpack, but I&#39;m loving it so far.
+With it&#39;s loaders, such as babel-loader, adopting ES6 is a breeze.</p>
+<h2 id="-docker-compose-https-docs-docker-com-compose-"><a href="https://docs.docker.com/compose/">Docker-compose</a></h2>
+<p>Manage a collection of Docker containers and link them together.</p>
+<p>Here&#39;s an example of tying together several containers:</p>
+<pre><code class="lang-yaml"><span class="hljs-attribute">redis</span>:
+    <span class="hljs-attribute">build</span>: db/redis/
+
+<span class="hljs-attribute">mongo</span>:
+    <span class="hljs-attribute">build</span>: db/mongo/
+
+<span class="hljs-attribute">website</span>:
+    <span class="hljs-attribute">build</span>: app/website/
+    <span class="hljs-attribute">links</span>:
+     - redis
+     - mongo
+</code></pre>
+<p>Here, 3 containers are linked together, and running <code>docker-compose up</code> builds all the images and starts the containers. </p>
+<p>For development, I extend this with some more goodies:</p>
+<pre><code class="lang-yaml"><span class="hljs-symbol">mongo:</span>
+    <span class="hljs-comment"># expose the port to the host machine so I can easily connect to it with dev tools.</span>
+    <span class="hljs-symbol">ports:</span>
+     - <span class="hljs-string">"27017:27017"</span>                                
+
+<span class="hljs-symbol">website:</span>
+    <span class="hljs-comment"># mount some folders from the host for development:</span>
+    <span class="hljs-comment"># - source code</span>
+    <span class="hljs-comment"># - my own node_modules (I use npm link with my own modules)</span>
+    <span class="hljs-symbol">volumes:</span>                                        
+     - ./app/<span class="hljs-symbol">website:</span>/nodeapp                       
+     - ../modules/<span class="hljs-symbol">:/usr/local/lib/node_modules/</span>     
+
+    <span class="hljs-comment"># expose the app and webpack-dev-server to host</span>
+    <span class="hljs-symbol">ports:</span>
+     - <span class="hljs-string">"8080:8080"</span>                                  
+     - <span class="hljs-string">"8090:8090"</span>                                  
+
+    <span class="hljs-comment"># nodemon for server restart on code changes &amp; webpack-dev-server to serve client modules</span>
+    <span class="hljs-symbol">command:</span> &gt;                                      
+            nodemon -w server/ server/index.js
+            &amp; npm run dev
+
+    <span class="hljs-comment"># trim logging</span>
+    <span class="hljs-symbol">log_driver:</span> <span class="hljs-string">"json-file"</span>                         
+    <span class="hljs-symbol">log_opt:</span>
+        max-<span class="hljs-symbol">size:</span> <span class="hljs-string">"100k"</span>
+        max-<span class="hljs-symbol">file:</span> <span class="hljs-string">"1"</span>
+</code></pre>
+<p>Then you can make a quick bash script:</p>
+<pre><code class="lang-bash">FILES=<span class="hljs-string">"-f infra.base.yaml -f infra.dev.yaml"</span>
+
+<span class="hljs-keyword">if</span> [ <span class="hljs-string">"<span class="hljs-variable">$ENV</span>"</span> = <span class="hljs-string">"PROD"</span> ]; <span class="hljs-keyword">then</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-operator">-e</span> <span class="hljs-string">"Environment: \e[1;32mPRODUCTION\e[m"</span>
+    FILES=<span class="hljs-string">"-f infra.base.yaml"</span>
+<span class="hljs-keyword">else</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-operator">-e</span> <span class="hljs-string">"Environment: \e[1;31mDEV\e[m"</span>
+    FILES=<span class="hljs-string">"-f infra.base.yaml -f infra.dev.yaml"</span>
+<span class="hljs-keyword">fi</span>
+
+docker-compose <span class="hljs-variable">$FILES</span> <span class="hljs-variable">$@</span>
+</code></pre>
+<p>and use it: </p>
+<pre><code>./infra <span class="hljs-keyword">up</span>
+</code></pre><p>and then deploy it:</p>
+<pre><code><span class="hljs-keyword">export</span> <span class="hljs-literal">ENV</span>=PROD
+./infra up
+</code></pre>]]></content>
+        <summary type="html">
+            <![CDATA[How would you like to be able to run one command and have your entire development stack up and running? 
+./infra up
+
+And this starts my database service, runs the server, compiles the client modules, and then watches any files 
+for changes and restarts the server if needed, reloads the page...]]>
+        </summary>
+
+        
+        <category term="Docker" scheme="http://cri5ti.com/tags/Docker/"/>
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Node plays modded - Hacking the Minecraft protocol]]></title>
+        <link href="http://cri5ti.com/dev/2015/10/18/Minecraft-protocol/"/>
+        <id>http://cri5ti.com/dev/2015/10/18/Minecraft-protocol/</id>
+        <published>2015-10-18T11:00:00+00:00</published>
+        <updated>2015-10-18T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>I&#39;ve written an implementation of the Minecraft protocol in Nodejs.</p>
+<p>It resembles the <a href="https://github.com/PrismarineJS/node-minecraft-protocol">node-minecraft-protocol</a> project, but it 
+supports defining plugin channel protocols as well, so it supports modded clients / servers.  </p>
+<p>I intend to use it as a proxy, to be able to switch servers in real time and maybe gather some more profiling for the dashboard.</p>
+<h1 id="test-run-">Test run:</h1>
+<p>Let&#39;s create a 1.7.10 client with Forge support.</p>
+<pre><code><span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> mc.Client({
+    version: <span class="hljs-string">'1.7.10'</span>,
+    ext: [<span class="hljs-string">'forge-1.7.10'</span>]
+});
+</code></pre><p>Prepare the endpoints:</p>
+<pre><code><span class="hljs-variable"><span class="hljs-keyword">var</span> ep</span> = client.endpoint;
+<span class="hljs-variable"><span class="hljs-keyword">var</span> fmlHS</span> = ep.channel('FML|HS');
+</code></pre><p>Log in:</p>
+<pre><code><span class="hljs-tag">ep</span><span class="hljs-class">.on</span>(<span class="hljs-string">'connect'</span>, () =&gt; {
+    <span class="hljs-tag">ep</span><span class="hljs-class">.send</span>(<span class="hljs-string">'handshake'</span>, {
+        <span class="hljs-attribute">protocolVersion</span>: <span class="hljs-number">5</span>,
+        <span class="hljs-attribute">serverAddress</span>: <span class="hljs-string">'localhost'</span>,
+        <span class="hljs-attribute">serverPort</span>: <span class="hljs-number">25565</span>,
+        <span class="hljs-attribute">nextState</span>: <span class="hljs-number">2</span>
+    });
+
+    <span class="hljs-tag">ep</span><span class="hljs-class">.send</span>(<span class="hljs-string">'loginStart'</span>, { <span class="hljs-attribute">name</span>: playerName });
+});
+</code></pre><p>Maintain the keep alive:</p>
+<pre><code>ep.<span class="hljs-literal">on</span>(<span class="hljs-string">'keepAlive'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> =&gt;</span> {
+    ep.send(<span class="hljs-string">'keepAlive'</span>, { <span class="hljs-attribute">id</span>: data.id });
+});
+</code></pre><p>And move when we join the game:  </p>
+<pre><code>ep.<span class="hljs-literal">on</span>(<span class="hljs-string">'joinGame'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    var myPos;
+
+    ep.<span class="hljs-literal">on</span>(<span class="hljs-string">'playerPosLook'</span>, <span class="hljs-function"><span class="hljs-params">(d)</span> =&gt;</span> {
+        myPos = d;
+    });
+
+    setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        myPos.stance = Math.round(myPos.y - <span class="hljs-number">1.62</span>);
+        ep.send(<span class="hljs-string">'playerPosition'</span>, myPos);
+        myPos.z -= <span class="hljs-number">0.01</span>;
+    }, <span class="hljs-number">50</span>);
+
+});
+</code></pre><p>Here&#39;s a test run with about 20 bots running left to right.</p>
+{% img src='ingame.png', class='enlarge' %}
+<p>Sadly, I need to do some more optimizations, as at around 50 clients, the cpu load jumps at around 15~20%, which is unnacceptable 
+for a proxy. Or I might disable packet inspection and just pass data through until some interesting event is triggered.</p>
+]]></content>
+        <summary type="html">
+            <![CDATA[I&#39;ve written an implementation of the Minecraft protocol in Nodejs.
+It resembles the node-minecraft-protocol project, but it 
+supports defining plugin channel protocols as well, so it supports modded clients / servers.  
+I intend to use it as a proxy, to be able to switch servers in real time and maybe...]]>
+        </summary>
+
+        
+        <category term="minecraft" scheme="http://cri5ti.com/tags/minecraft/"/>
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Mapping with d3]]></title>
+        <link href="http://cri5ti.com/dev/2015/10/15/d3-maps/"/>
+        <id>http://cri5ti.com/dev/2015/10/15/d3-maps/</id>
+        <published>2015-10-15T11:00:00+00:00</published>
+        <updated>2015-10-15T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>I&#39;ve previously started playing with <a href="http://d3js.org">D3.js</a>, and I really enjoyed it&#39;s power and it&#39;s core idea of how
+ it maintains the state and updates (which reminds me of <a href="https://facebook.github.io/react/">React</a>)</p>
+<p>I&#39;ve rendered a Minecraft world to tiles using <a href="http://mapcrafter.org/">Mapcrafter</a>
+ and then feed them to the <a href="https://github.com/d3/d3-plugins/tree/master/geo/tile">d3.geo.tile</a> plugin.</p>
+{% img src='map.png', class='enlarge' %}
+]]></content>
+        <summary type="html">
+            <![CDATA[I&#39;ve previously started playing with D3.js, and I really enjoyed it&#39;s power and it&#39;s core idea of how
+ it maintains the state and updates (which reminds me of React)
+I&#39;ve rendered a Minecraft world to tiles using Mapcrafter
+ and then feed them to the d3.geo.tile plugin.
+
+...]]>
+        </summary>
+
+        
+        <category term="d3.js" scheme="http://cri5ti.com/tags/d3.js/"/>
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+        <category term="minecraft" scheme="http://cri5ti.com/tags/minecraft/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
+        <title><![CDATA[Monitoring dashboard]]></title>
+        <link href="http://cri5ti.com/dev/2015/10/11/Dashboard/"/>
+        <id>http://cri5ti.com/dev/2015/10/11/Dashboard/</id>
+        <published>2015-10-11T11:00:00+00:00</published>
+        <updated>2015-10-11T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[<p>Here I&#39;m trying to build a quick monitoring app to collect, aggregate, store, and display data:  </p>
+<p>So far I&#39;ve fleshed out the UI with some random fake data.</p>
+<p>I&#39;ve already been able to collect Java profiling data over JMX from node.js, so the rest shouldn&#39;t be much of a problem. </p>
+<p>For charts, I&#39;ve tried out several charting libraries, but ended up using the more general <a href="http://d3js.org">D3.js</a> library, 
+and it&#39;s been an amazing learning opportunity.</p>
+{% img src='dashboard.png', class='enlarge' %}
+]]></content>
+        <summary type="html">
+            <![CDATA[Here I&#39;m trying to build a quick monitoring app to collect, aggregate, store, and display data:  
+So far I&#39;ve fleshed out the UI with some random fake data.
+I&#39;ve already been able to collect Java profiling data over JMX from node.js, so the rest shouldn&#39;t be much of a problem....]]>
+        </summary>
+
+        
+        <category term="node.js" scheme="http://cri5ti.com/tags/node.js/"/>
+        
+        <category term="d3.js" scheme="http://cri5ti.com/tags/d3.js/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
         <title><![CDATA[No spam please!: Clean up spam in Google Analytics]]></title>
-        <link href="http://cri5ti.com/web/2015/10/06/Cleanup-Analytics/"/>
-        <id>http://cri5ti.com/web/2015/10/06/Cleanup-Analytics/</id>
+        <link href="http://cri5ti.com/dev/2015/10/06/Cleanup-Analytics/"/>
+        <id>http://cri5ti.com/dev/2015/10/06/Cleanup-Analytics/</id>
         <published>2015-10-06T11:00:00+00:00</published>
         <updated>2015-10-06T11:00:00+00:00</updated>
         <content type="html"><![CDATA[<p>For the past year or so, Google Analytics has been showing complete garbage for my site, and if you&#39;re here, 
@@ -91,9 +353,121 @@ What&#39;s probably going on is that some wise guys decided it would be a...]]>
         
 
     <entry>
+        <title><![CDATA[LOD chunked rendering]]></title>
+        <link href="http://cri5ti.com/game/2015/09/27/chunked-LOD/"/>
+        <id>http://cri5ti.com/game/2015/09/27/chunked-LOD/</id>
+        <published>2015-09-27T11:00:00+00:00</published>
+        <updated>2015-09-27T11:00:00+00:00</updated>
+        <content type="html"><![CDATA[{% section 'img-right' %}
+{% img src='grid.svg' %}
+<p>A naive approach in rendering the chunks in a view frustum would result in this example in about <em>230 chunks</em>.</p>
+{% endsection %}
+<hr>
+{% section 'img-right' %}
+{% img 'lod.svg' %}
+<p>We can take advantage of the perspective, and render chunks at different level of details based on the distance to the camera.</p>
+<p>In the above example, we can considerably reduce the number of chunks to <strong>17</strong>.</p>
+<p>Because of the perspective, each chunk will have the same width on screen (one chunk wide in the example), so we should have a constant chunk density on screen space.</p>
+{% endsection %}
+<hr>
+<p>An <a href="https://en.wikipedia.org/wiki/Octree">Octree</a> structure seems the perfect choice in building the chunk render list.</p>
+{% section 'img-right' %}
+{% img src='quad.svg' %}
+<pre><code class="lang-cpp">template &lt;typename <span class="hljs-type">Data</span>&gt;
+struct Octree {
+    <span class="hljs-type">Data</span>* <span class="hljs-keyword">value</span>;
+    vec3 center;
+    <span class="hljs-built_in">float</span> <span class="hljs-built_in">size</span>;
+
+    Octree&lt;<span class="hljs-type">Data</span>&gt; *parent;
+    Octree&lt;<span class="hljs-type">Data</span>&gt; *children[<span class="hljs-number">8</span>];
+
+    <span class="hljs-built_in">int</span> level; 
+    <span class="hljs-built_in">int</span> <span class="hljs-built_in">index</span>; // child <span class="hljs-built_in">index</span> <span class="hljs-type">in</span> parent
+    bool leaf;
+};
+</code></pre>
+{% endsection %}
+<h2 id="building-the-octree">Building the octree</h2>
+<ol>
+<li>start from the biggest cell that contains the complete view frustum</li>
+<li>determine LOD based on distance to frustum</li>
+<li>if current cell level == computed LOD, then add chunk to render list</li>
+<li>if current cell level &lt; computed LOD, iterate children</li>
+</ol>
+<h3 id="1-determine-the-start-cell">1. Determine the start cell</h3>
+<p>For the first time, we start from an arbitrary cell in the octree.</p>
+<p>From here, we keep zooming out the octree (by navigating the parents) until our cell contains the whole view frustum.</p>
+{% section 'img-right' %}
+{% img 'zoom-out.gif' %}
+<pre><code class="lang-cpp"><span class="hljs-keyword">while</span> (!chunkContainsCube(chunk, cameraPos, viewDistance)) {
+    <span class="hljs-built_in">c</span> = <span class="hljs-built_in">c</span>-&gt;getOrMakeParent(<span class="hljs-type">CHILD_LEFT_DOWN_BACK</span>);
+    <span class="hljs-built_in">c</span> = <span class="hljs-built_in">c</span>-&gt;getOrMakeParent(<span class="hljs-type">CHILD_RIGHT_UP_FRONT</span>);
+}
+</code></pre>
+{% endsection %}
+<hr>
+<p>While zooming out, we create 2 levels in the Octree, to ensure that we enlarge on all dimensions:</p>
+{% img 'expansion.svg' %}
+<hr>
+<p>Next, we check if we can zoom in, by checking if any of the children contains the frustum completely.</p>
+{% section 'img-right' %}
+{% img 'zoom-in.gif' %}
+<pre><code class="lang-cpp">again:
+<span class="hljs-keyword">for</span> (<span class="hljs-type">Chunk</span>* <span class="hljs-built_in">c</span> : chunk-&gt;children) {
+    <span class="hljs-keyword">if</span> (cubeContainsChunk(cameraPos, viewDistance, <span class="hljs-built_in">c</span>)) {
+        chunk = <span class="hljs-built_in">c</span>;
+        goto again;
+    }
+}
+</code></pre>
+{% endsection %}
+<hr>
+<p>Now we have determined our start octree cell for building our render list.</p>
+<hr>
+<h2 id="results">Results</h2>
+<p>Here are the chunks rendered in our engine:</p>
+<div class="img-grid">
+<figure>
+    {% img 'screen1.png', label='Chunks crossing the y=0 plane' %}
+    <figcaption>Only the chunks crossing the y=0 plane.</figcaption>
+</figure>
+<figure>
+    {% img 'screen2.png', label='All chunks' %}
+    <figcaption>All chunks</figcaption>
+</figure>
+</div>
+
+<hr>
+<video src="{% asset_url 'video.mp4' %}" width="642" controls/>
+
+<hr>
+]]></content>
+        <summary type="html">
+            <![CDATA[ A naive approach in rendering the chunks in a view frustum would result in this example in about 230 chunks.
+
+
+
+
+We can take advantage of the perspective, and render chunks at different level of details based on the distance to the camera.
+In the above example, we can considerably reduce the...]]>
+        </summary>
+
+        
+        <category term="LOD" scheme="http://cri5ti.com/tags/LOD/"/>
+        
+        <category term="Octree" scheme="http://cri5ti.com/tags/Octree/"/>
+        
+    </entry>
+
+    
+
+        
+
+    <entry>
         <title><![CDATA[Powered by: Forge - A Node.js static content generator]]></title>
-        <link href="http://cri5ti.com/web/2015/09/25/My-static-generator/"/>
-        <id>http://cri5ti.com/web/2015/09/25/My-static-generator/</id>
+        <link href="http://cri5ti.com/dev/2015/09/25/My-static-generator/"/>
+        <id>http://cri5ti.com/dev/2015/09/25/My-static-generator/</id>
         <published>2015-09-25T11:00:00+00:00</published>
         <updated>2015-09-25T11:00:00+00:00</updated>
         <content type="html"><![CDATA[<p>After trying out static website generators, like <a href="https://jekyllrb.com/">Jekyll</a> and <a href="http://octopress.org/">Octopress</a>, I have 
